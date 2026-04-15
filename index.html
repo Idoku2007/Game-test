@@ -2,59 +2,86 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Idoku Gacha</title>
+<title>Idoku Mobile Gacha</title>
 
 <style>
 body{
   margin:0;
   font-family:Arial;
-  background:#0f0f1a;
+  background:linear-gradient(180deg,#0b0b12,#15152a);
   color:white;
-  text-align:center;
+  display:flex;
+  justify-content:center;
 }
 
-.container{padding:20px;}
-
-button{
-  padding:12px 18px;
-  margin:8px;
-  border:none;
-  border-radius:10px;
-  background:#6c5ce7;
-  color:white;
-  font-size:16px;
-  cursor:pointer;
-}
-
-.result{
-  margin-top:20px;
-  background:#1e1e2f;
+.container{
+  width:100%;
+  max-width:420px;
   padding:15px;
-  border-radius:12px;
-  text-align:left;
 }
 
-.pity{
+/* 🎯 TITLE */
+h1{
+  text-align:center;
+  font-size:22px;
+}
+
+/* 📊 RARITY BOARD */
+.rarity-board{
   background:#111122;
   padding:10px;
-  border-radius:10px;
-  margin-bottom:15px;
-  text-align:left;
+  border-radius:12px;
+  font-size:12px;
+  margin-bottom:10px;
+}
+
+.rarity-board div{
+  display:flex;
+  justify-content:space-between;
+  padding:2px 0;
+}
+
+/* 🔋 PITY */
+.pity{
+  background:#1a1a33;
+  padding:10px;
+  border-radius:12px;
+  margin-bottom:10px;
 }
 
 .bar{
   width:100%;
-  height:15px;
+  height:10px;
   background:#333;
   border-radius:10px;
   overflow:hidden;
-  margin-top:5px;
 }
 
 .fill{
   height:100%;
   width:0%;
   background:linear-gradient(90deg,#00d4ff,#ff00ff);
+}
+
+/* 🎰 BUTTONS */
+button{
+  width:100%;
+  padding:15px;
+  margin:6px 0;
+  border:none;
+  border-radius:12px;
+  background:#6c5ce7;
+  color:white;
+  font-size:18px;
+}
+
+/* 🎴 RESULT */
+.result{
+  margin-top:10px;
+  background:#1e1e2f;
+  padding:12px;
+  border-radius:12px;
+  font-size:14px;
 }
 </style>
 </head>
@@ -63,19 +90,31 @@ button{
 
 <div class="container">
 
-<h1>🎰 Idoku Gacha System</h1>
+<h1>🎰 Idoku Gacha Mobile</h1>
 
+<!-- 📊 RARITY TABLE -->
+<div class="rarity-board">
+<div><span>Common (Soldier)</span><span>40%</span></div>
+<div><span>Uncommon (Ranged)</span><span>25%</span></div>
+<div><span>Rare (Wizard)</span><span>15%</span></div>
+<div><span>Epic</span><span>10%</span></div>
+<div><span>Legendary</span><span>7.5%</span></div>
+<div><span>Heroic</span><span>1.5%</span></div>
+<div><span>Rainbow+</span><span>&lt;1%</span></div>
+</div>
+
+<!-- 🔋 PITY -->
 <div class="pity">
 🔋 Pity: <span id="pityText">0 / 50</span>
-<div class="bar">
-<div class="fill" id="pityFill"></div>
-</div>
+<div class="bar"><div class="fill" id="pityFill"></div></div>
 <div id="pityState">Normal</div>
 </div>
 
+<!-- 🎰 BUTTONS -->
 <button onclick="roll1()">ROLL x1</button>
 <button onclick="roll10()">ROLL x10</button>
 
+<!-- 🎴 RESULT -->
 <div id="result" class="result">Chưa roll...</div>
 
 </div>
@@ -85,27 +124,18 @@ button{
 let pity = 0;
 let last = [];
 
-// 🎲 CORE ROLL SYSTEM
+// 🎲 ROLL SYSTEM
 function getRoll(isPity=false){
 
-  let r = Math.random() * 100;
+  let r = Math.random()*100;
 
   // 🔥 PITY GUARANTEE
   if(isPity){
-    let pr = Math.random() * 100;
-
-    if(pr < 20){
-      return {name:"Tatsuki Idoku V1/V2", rarity:"👑 God Relic"};
-    }
-    else if(pr < 60){
-      return {name:"Kanzaki Tomoya", rarity:"⚔️ Ultra Relic"};
-    }
-    else{
-      return {name:"Fuoka Shinji", rarity:"🌠 Ultra Rainbow"};
-    }
+    let pr = Math.random()*100;
+    if(pr < 20) return {name:"Idoku V1/V2", rarity:"👑 God Relic"};
+    if(pr < 60) return {name:"Tomoya", rarity:"⚔️ Ultra Relic"};
+    return {name:"Shinji", rarity:"🌠 Ultra Rainbow"};
   }
-
-  // 🎮 NORMAL RARITY TABLE
 
   if(r < 40) return {name:"Soldier", rarity:"Common"};
   if(r < 65) return {name:"Ranged", rarity:"Uncommon"};
@@ -120,46 +150,38 @@ function getRoll(isPity=false){
   if(r < 99.8) return {name:"Ultra Rainbow"};
   if(r < 99.95) return {name:"Ultra Relic"};
 
-  return {name:"Idoku V1/V2", rarity:"👑 God Relic"};
+  return {name:"Idoku V1/V2", rarity:"God Relic"};
 }
 
-// 🎨 SHOW RESULT
+// 🎴 RENDER
 function render(){
-
-  let html = "";
-
+  let html="";
   last.forEach(c=>{
-    html += `<div><b>${c.name}</b><br>${c.rarity}<hr></div>`;
+    html+=`<div><b>${c.name}</b><br>${c.rarity||""}<hr></div>`;
   });
-
-  document.getElementById("result").innerHTML = html;
+  document.getElementById("result").innerHTML=html;
 }
 
-// 🔋 PITY SYSTEM
+// 🔋 PITY UPDATE
 function updatePity(){
 
   document.getElementById("pityText").innerText = pity + " / 50";
 
   let percent = (pity/50)*100;
-  document.getElementById("pityFill").style.width = percent + "%";
+  document.getElementById("pityFill").style.width = percent+"%";
 
-  if(pity >= 50){
-    document.getElementById("pityState").innerText = "⚠️ PITY GUARANTEE READY";
-  } else {
-    document.getElementById("pityState").innerText = "Normal";
-  }
+  document.getElementById("pityState").innerText =
+    pity>=50 ? "⚠️ GUARANTEE READY" : "Normal";
 }
 
 // 🎰 ROLL 1
 function roll1(){
 
   pity++;
+  let isPity = pity>=50;
+  if(isPity) pity=0;
 
-  let isPity = pity >= 50;
-  if(isPity) pity = 0;
-
-  last = [getRoll(isPity)];
-
+  last=[getRoll(isPity)];
   render();
   updatePity();
 }
@@ -167,20 +189,18 @@ function roll1(){
 // 🎰 ROLL 10
 function roll10(){
 
-  let arr = [];
+  let arr=[];
 
   for(let i=0;i<10;i++){
 
     pity++;
-
-    let isPity = pity >= 50;
-    if(isPity) pity = 0;
+    let isPity = pity>=50;
+    if(isPity) pity=0;
 
     arr.push(getRoll(isPity));
   }
 
-  last = arr;
-
+  last=arr;
   render();
   updatePity();
 }
