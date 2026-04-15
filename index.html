@@ -16,14 +16,14 @@ body{
 .container{padding:20px;}
 
 button{
-  padding:12px 16px;
+  padding:12px 18px;
   margin:8px;
   border:none;
   border-radius:10px;
   background:#6c5ce7;
   color:white;
-  cursor:pointer;
   font-size:16px;
+  cursor:pointer;
 }
 
 .result{
@@ -81,49 +81,61 @@ button{
 </div>
 
 <script>
-let pity = 0;
-let lastRoll = [];
 
-// 🎲 ROLL
+let pity = 0;
+let last = [];
+
+// 🎲 CORE ROLL SYSTEM
 function getRoll(isPity=false){
 
   let r = Math.random() * 100;
 
-  // PITY
+  // 🔥 PITY GUARANTEE
   if(isPity){
     let pr = Math.random() * 100;
-    if(pr < 10) return {name:"Tatsuki Idoku V1/V2", rarity:"👑 God Relic"};
-    if(pr < 40) return {name:"Kanzaki Tomoya", rarity:"⚔️ Ultra Relic"};
-    return {name:"Fuoka Shinji", rarity:"🌠 Ultra Rainbow"};
+
+    if(pr < 20){
+      return {name:"Tatsuki Idoku V1/V2", rarity:"👑 God Relic"};
+    }
+    else if(pr < 60){
+      return {name:"Kanzaki Tomoya", rarity:"⚔️ Ultra Relic"};
+    }
+    else{
+      return {name:"Fuoka Shinji", rarity:"🌠 Ultra Rainbow"};
+    }
   }
 
-  // NORMAL RARITY
+  // 🎮 NORMAL RARITY TABLE
+
   if(r < 40) return {name:"Soldier", rarity:"Common"};
   if(r < 65) return {name:"Ranged", rarity:"Uncommon"};
   if(r < 80) return {name:"Wizard", rarity:"Rare"};
-  if(r < 90) return {name:"Epic Unit", rarity:"Epic"};
+  if(r < 90) return {name:"Epic"};
 
   // ⭐ LEGENDARY 7.5%
   if(r < 97.5) return {name:"Legendary Warrior", rarity:"Legendary (7.5%)"};
 
-  if(r < 99) return {name:"Heroic Champion", rarity:"Heroic"};
-  if(r < 99.5) return {name:"Rainbow Hero", rarity:"Rainbow"};
-  if(r < 99.8) return {name:"Ultra Rainbow", rarity:"Ultra Rainbow"};
-  if(r < 99.95) return {name:"Ultra Relic Unit", rarity:"Ultra Relic"};
+  if(r < 99) return {name:"Heroic"};
+  if(r < 99.5) return {name:"Rainbow"};
+  if(r < 99.8) return {name:"Ultra Rainbow"};
+  if(r < 99.95) return {name:"Ultra Relic"};
 
-  return {name:"Tatsuki Idoku V1/V2", rarity:"👑 God Relic"};
+  return {name:"Idoku V1/V2", rarity:"👑 God Relic"};
 }
 
-// 🎨 RENDER
+// 🎨 SHOW RESULT
 function render(){
+
   let html = "";
-  lastRoll.forEach(c=>{
+
+  last.forEach(c=>{
     html += `<div><b>${c.name}</b><br>${c.rarity}<hr></div>`;
   });
+
   document.getElementById("result").innerHTML = html;
 }
 
-// 🔋 PITY
+// 🔋 PITY SYSTEM
 function updatePity(){
 
   document.getElementById("pityText").innerText = pity + " / 50";
@@ -132,25 +144,27 @@ function updatePity(){
   document.getElementById("pityFill").style.width = percent + "%";
 
   if(pity >= 50){
-    document.getElementById("pityState").innerText = "⚠️ BẢO HIỂM ULTRA+";
+    document.getElementById("pityState").innerText = "⚠️ PITY GUARANTEE READY";
   } else {
     document.getElementById("pityState").innerText = "Normal";
   }
 }
 
-// 🎰 ROLL x1
+// 🎰 ROLL 1
 function roll1(){
 
   pity++;
+
   let isPity = pity >= 50;
   if(isPity) pity = 0;
 
-  lastRoll = [getRoll(isPity)];
+  last = [getRoll(isPity)];
+
   render();
   updatePity();
 }
 
-// 🎰 ROLL x10
+// 🎰 ROLL 10
 function roll10(){
 
   let arr = [];
@@ -158,16 +172,19 @@ function roll10(){
   for(let i=0;i<10;i++){
 
     pity++;
+
     let isPity = pity >= 50;
     if(isPity) pity = 0;
 
     arr.push(getRoll(isPity));
   }
 
-  lastRoll = arr;
+  last = arr;
+
   render();
   updatePity();
 }
+
 </script>
 
 </body>
