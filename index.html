@@ -2,8 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Idoku Gacha System</title>
+<title>Idoku Gacha</title>
 
 <style>
 body{
@@ -14,7 +13,7 @@ body{
   text-align:center;
 }
 
-.container{ padding:20px; }
+.container{padding:20px;}
 
 button{
   padding:12px 16px;
@@ -24,59 +23,38 @@ button{
   background:#6c5ce7;
   color:white;
   cursor:pointer;
+  font-size:16px;
 }
 
-/* 🌈 RARITY BOARD */
-.rarity-board{
-  background:#111122;
-  padding:12px;
-  border-radius:12px;
-  margin-bottom:10px;
-  text-align:left;
-  font-size:14px;
-  line-height:1.6;
-}
-
-/* 🔋 PITY BAR */
-.pity-box{
+.result{
+  margin-top:20px;
   background:#1e1e2f;
+  padding:15px;
+  border-radius:12px;
+  text-align:left;
+}
+
+.pity{
+  background:#111122;
   padding:10px;
   border-radius:10px;
   margin-bottom:15px;
   text-align:left;
 }
 
-.pity-bar{
+.bar{
   width:100%;
-  height:18px;
+  height:15px;
   background:#333;
   border-radius:10px;
   overflow:hidden;
+  margin-top:5px;
 }
 
-.pity-fill{
+.fill{
   height:100%;
   width:0%;
   background:linear-gradient(90deg,#00d4ff,#ff00ff);
-  transition:0.3s;
-}
-
-.card{
-  margin-top:20px;
-  padding:15px;
-  background:#1e1e2f;
-  border-radius:12px;
-  text-align:left;
-}
-
-.item{
-  padding:10px;
-  border-bottom:1px solid #333;
-}
-
-.evo{
-  color:#00d4ff;
-  font-weight:bold;
 }
 </style>
 </head>
@@ -84,129 +62,95 @@ button{
 <body>
 
 <div class="container">
-  <h1>🎰 Idoku Gacha System</h1>
 
-  <!-- 🌈 RARITY -->
-  <div class="rarity-board">
-    ⚪ Common 40%<br>
-    🟢 Uncommon 25%<br>
-    🔵 Rare 15%<br>
-    🟣 Epic 10%<br>
-    🔶 Heroic 5%<br>
-    🌈 Rainbow 2.5%<br>
-    🌠 Ultra Rainbow 0.8%<br>
-    ⚔️ Ultra Relic 0.2%<br>
-    👑 God Relic 0.02%
-  </div>
+<h1>🎰 Idoku Gacha System</h1>
 
-  <!-- 🔋 PITY -->
-  <div class="pity-box">
-    🔋 Pity: <span id="pityText">0 / 50</span><br><br>
+<div class="pity">
+🔋 Pity: <span id="pityText">0 / 50</span>
+<div class="bar">
+<div class="fill" id="pityFill"></div>
+</div>
+<div id="pityState">Normal</div>
+</div>
 
-    <div class="pity-bar">
-      <div class="pity-fill" id="pityFill"></div>
-    </div>
+<button onclick="roll1()">ROLL x1</button>
+<button onclick="roll10()">ROLL x10</button>
 
-    <div id="pityState" style="margin-top:8px; color:#00d4ff;">
-      Normal
-    </div>
-  </div>
+<div id="result" class="result">Chưa roll...</div>
 
-  <button onclick="roll1()">ROLL x1</button>
-  <button onclick="roll10()">ROLL x10</button>
-
-  <div class="card" id="result">Chưa roll...</div>
 </div>
 
 <script>
-
-let lastRoll = [];
 let pity = 0;
+let lastRoll = [];
 
-// 🔋 UPDATE PITY UI
-function updatePityUI(){
+// 🎲 ROLL
+function getRoll(isPity=false){
 
-  document.getElementById("pityText").innerText = `${pity} / 50`;
+  let r = Math.random() * 100;
 
-  let percent = (pity / 50) * 100;
+  // PITY
+  if(isPity){
+    let pr = Math.random() * 100;
+    if(pr < 10) return {name:"Tatsuki Idoku V1/V2", rarity:"👑 God Relic"};
+    if(pr < 40) return {name:"Kanzaki Tomoya", rarity:"⚔️ Ultra Relic"};
+    return {name:"Fuoka Shinji", rarity:"🌠 Ultra Rainbow"};
+  }
+
+  // NORMAL RARITY
+  if(r < 40) return {name:"Soldier", rarity:"Common"};
+  if(r < 65) return {name:"Ranged", rarity:"Uncommon"};
+  if(r < 80) return {name:"Wizard", rarity:"Rare"};
+  if(r < 90) return {name:"Epic Unit", rarity:"Epic"};
+
+  // ⭐ LEGENDARY 7.5%
+  if(r < 97.5) return {name:"Legendary Warrior", rarity:"Legendary (7.5%)"};
+
+  if(r < 99) return {name:"Heroic Champion", rarity:"Heroic"};
+  if(r < 99.5) return {name:"Rainbow Hero", rarity:"Rainbow"};
+  if(r < 99.8) return {name:"Ultra Rainbow", rarity:"Ultra Rainbow"};
+  if(r < 99.95) return {name:"Ultra Relic Unit", rarity:"Ultra Relic"};
+
+  return {name:"Tatsuki Idoku V1/V2", rarity:"👑 God Relic"};
+}
+
+// 🎨 RENDER
+function render(){
+  let html = "";
+  lastRoll.forEach(c=>{
+    html += `<div><b>${c.name}</b><br>${c.rarity}<hr></div>`;
+  });
+  document.getElementById("result").innerHTML = html;
+}
+
+// 🔋 PITY
+function updatePity(){
+
+  document.getElementById("pityText").innerText = pity + " / 50";
+
+  let percent = (pity/50)*100;
   document.getElementById("pityFill").style.width = percent + "%";
 
   if(pity >= 50){
-    document.getElementById("pityState").innerText = "⚠️ BẢO HIỂM KÍCH HOẠT (Ultra+ guaranteed)";
+    document.getElementById("pityState").innerText = "⚠️ BẢO HIỂM ULTRA+";
   } else {
     document.getElementById("pityState").innerText = "Normal";
   }
 }
 
-// 🎲 ROLL SYSTEM
-function getRoll(isPity=false){
-
-  let r = Math.random() * 100;
-
-  // 💥 PITY GUARANTEE (Ultra Rainbow+)
-  if(isPity){
-    let pr = Math.random() * 100;
-
-    if(pr < 10){
-      return {name:"Tatsuki Idoku V1/V2", rarity:"👑 God Relic (0.02%)", type:"idoku", form:"V1"};
-    }
-    else if(pr < 35){
-      return {name:"Kanzaki Tomoya", rarity:"⚔️ Ultra Relic (0.2%)"};
-    }
-    else{
-      return {name:"Fuoka Shinji", rarity:"🌠 Ultra Rainbow (0.8%)"};
-    }
-  }
-
-  // NORMAL
-  if(r < 40) return {name:"Soldier", rarity:"⚪ Common"};
-  if(r < 65) return {name:"Ranged", rarity:"🟢 Uncommon"};
-  if(r < 80) return {name:"Wizard", rarity:"🔵 Rare"};
-  if(r < 90) return {name:"Heroic Warrior", rarity:"🔶 Heroic"};
-  if(r < 97.5) return {name:"Fuoka Shinji", rarity:"🌠 Ultra Rainbow (0.8%)"};
-  if(r < 98.3) return {name:"Kanzaki Tomoya", rarity:"⚔️ Ultra Relic (0.2%)"};
-
-  return {name:"Tatsuki Idoku V1/V2", rarity:"👑 God Relic (0.02%)", type:"idoku", form:"V1"};
-}
-
-// 🎨 RENDER
-function render(){
-
-  let html = "";
-
-  lastRoll.forEach((c, i)=>{
-
-    html += `<div class="item">`;
-    html += `<b>${c.name}</b><br>`;
-    html += `${c.rarity}<br>`;
-
-    if(c.type === "idoku"){
-      html += `<div class="evo">V1 ➜ V2 Transform available</div>`;
-      if(c.form === "V1"){
-        html += `<button onclick="transform(${i})">TRANSFORM</button>`;
-      }
-    }
-
-    html += `</div>`;
-  });
-
-  document.getElementById("result").innerHTML = html;
-}
-
-// 🎰 ROLL 1
+// 🎰 ROLL x1
 function roll1(){
 
   pity++;
   let isPity = pity >= 50;
-
   if(isPity) pity = 0;
 
   lastRoll = [getRoll(isPity)];
   render();
-  updatePityUI();
+  updatePity();
 }
 
-// 🎰 ROLL 10
+// 🎰 ROLL x10
 function roll10(){
 
   let arr = [];
@@ -215,7 +159,6 @@ function roll10(){
 
     pity++;
     let isPity = pity >= 50;
-
     if(isPity) pity = 0;
 
     arr.push(getRoll(isPity));
@@ -223,17 +166,8 @@ function roll10(){
 
   lastRoll = arr;
   render();
-  updatePityUI();
+  updatePity();
 }
-
-// ⚔️ TRANSFORM
-function transform(i){
-  lastRoll[i].form = "V2";
-  render();
-}
-
-updatePityUI();
-
 </script>
 
 </body>
