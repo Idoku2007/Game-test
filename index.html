@@ -37,7 +37,7 @@ button{
   line-height:1.6;
 }
 
-/* 🔋 PITY BAR */
+/* 🔋 PITY */
 .pity-box{
   background:#1e1e2f;
   padding:10px;
@@ -93,7 +93,7 @@ button{
     🔵 Rare 15%<br>
     🟣 Epic 10%<br>
     🔶 Heroic 5%<br>
-    🌈 Rainbow 2.5%<br>
+    🟠 Legendary 7.5%<br>
     🌠 Ultra Rainbow 0.8%<br>
     ⚔️ Ultra Relic 0.2%<br>
     👑 God Relic 0.02%
@@ -132,7 +132,8 @@ function updatePityUI(){
   document.getElementById("pityFill").style.width = percent + "%";
 
   if(pity >= 50){
-    document.getElementById("pityState").innerText = "⚠️ BẢO HIỂM KÍCH HOẠT (Ultra+ guaranteed)";
+    document.getElementById("pityState").innerText =
+    "⚠️ BẢO HIỂM KÍCH HOẠT (Ultra+ guaranteed)";
   } else {
     document.getElementById("pityState").innerText = "Normal";
   }
@@ -143,7 +144,7 @@ function getRoll(isPity=false){
 
   let r = Math.random() * 100;
 
-  // 💥 PITY GUARANTEE (Ultra Rainbow+)
+  // 💥 PITY GUARANTEE
   if(isPity){
     let pr = Math.random() * 100;
 
@@ -163,10 +164,14 @@ function getRoll(isPity=false){
   if(r < 65) return {name:"Ranged", rarity:"🟢 Uncommon"};
   if(r < 80) return {name:"Wizard", rarity:"🔵 Rare"};
   if(r < 90) return {name:"Heroic Warrior", rarity:"🔶 Heroic"};
-  if(r < 97.5) return {name:"Fuoka Shinji", rarity:"🌠 Ultra Rainbow (0.8%)"};
-  if(r < 98.3) return {name:"Kanzaki Tomoya", rarity:"⚔️ Ultra Relic (0.2%)"};
 
-  return {name:"Tatsuki Idoku V1/V2", rarity:"👑 God Relic (0.02%)", type:"idoku", form:"V1"};
+  // 🟠 LEGENDARY 7.5%
+  if(r < 97.5) return {name:"Elite Wizard", rarity:"🟠 Legendary"};
+
+  if(r < 98.3) return {name:"Fuoka Shinji", rarity:"🌠 Ultra Rainbow"};
+  if(r < 99.1) return {name:"Kanzaki Tomoya", rarity:"⚔️ Ultra Relic"};
+
+  return {name:"Tatsuki Idoku V1/V2", rarity:"👑 God Relic ", type:"idoku", form:"V1"};
 }
 
 // 🎨 RENDER
