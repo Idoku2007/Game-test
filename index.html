@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Idoku Gacha - Fixed</title>
+    <title>Idoku Gacha - Full System</title>
     <style>
         :root {
             --god: linear-gradient(45deg, #ff0000, #ffff00);
@@ -33,7 +33,7 @@
         .lobby-content { padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; overflow-y: auto; height: 100%; }
         .avatar-box { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--cyan); margin-bottom: 10px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
         .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
-        .name-display { color: var(--cyan); font-size: 24px; font-weight: 900; margin-bottom: 5px; }
+        .name-display { color: var(--cyan); font-size: 24px; font-weight: 900; margin-bottom: 5px; cursor: pointer; }
         .xp-container { width: 100%; background: #222; height: 10px; border-radius: 5px; margin-bottom: 15px; overflow: hidden; border: 1px solid #333; }
         #xp-bar { height: 100%; background: var(--cyan); width: 0%; transition: 0.3s; }
         .stats-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
@@ -42,7 +42,8 @@
         .stat-val { font-size: 12px; font-weight: 900; color: #fff; }
         .inventory-box { width: 100%; margin-top: 20px; text-align: left; }
         .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; padding-bottom: 20px; }
-        .inv-item { background: #1a1a1a; border-radius: 8px; padding: 8px; text-align: center; border: 1px solid #333; position: relative; }
+        .inv-item { background: #1a1a1a; border-radius: 8px; padding: 8px; text-align: center; border: 1px solid #333; position: relative; cursor: pointer; }
+        .inv-item.equipped { border: 2px solid var(--cyan); box-shadow: 0 0 10px var(--cyan); transform: scale(1.05); }
         .inv-item .sell-btn { background: #ff4d4d; border: none; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-top: 5px; cursor: pointer; width: 100%; }
         .inv-item-name { font-size: 9px; font-weight: bold; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         #p-adventure { justify-content: center; align-items: center; text-align: center; }
@@ -51,24 +52,19 @@
         .slime:active { transform: translateY(4px); box-shadow: 0 4px 0 #228b22; }
         .hp-bar { width: 220px; height: 12px; background: #333; border: 2px solid #444; border-radius: 10px; margin: 10px auto; overflow: hidden; }
         .hp-fill { height: 100%; background: #ff4d4d; width: 100%; transition: width 0.1s; }
-        .drop-text { position: absolute; color: #00fbff; font-weight: 900; font-size: 18px; pointer-events: none; animation: floatUp 0.8s forwards; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-80px); } }
         .info-bar { padding: 8px; background: #1a1a1a; border-bottom: 1px solid #222; text-align: center; }
         .pity-counter { font-size: 20px; font-weight: 900; color: #ffd700; }
-        .main-content { flex: 1; overflow-y: auto; padding: 10px; scrollbar-width: none; }
+        .main-content { flex: 1; overflow-y: auto; padding: 10px; }
         .rarity-table { background: #1a1a1a; border-radius: 12px; padding: 8px; margin-bottom: 12px; border: 1px solid #333; font-size: 8px; }
         .rarity-row { display: flex; justify-content: space-between; padding: 2px 4px; border-bottom: 1px solid #222; }
-        .banner-card { background: #1e1e1e; border-radius: 15px; padding: 12px; margin-bottom: 12px; border: 1px solid #333; text-align: center; }
+        .banner-card { background: #1e1e1e; border-radius: 15px; padding: 12px; margin-bottom: 12px; text-align: center; }
         .btn-group { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
-        button.summon { padding: 8px 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-size: 11px; }
-        .btn-1 { background: #444; color: #fff; }
-        .btn-10 { background: #ffd700; color: #000; }
+        .summon { padding: 8px 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
         .result-tray { height: 150px; background: #0a0a0a; border-top: 2px solid #222; display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; padding: 8px; overflow-y: auto; }
         .nav-bar { height: 70px; background: #1a1a1a; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #333; border-radius: 0 0 40px 40px; }
         .nav-btn { color: #444; font-weight: 900; font-size: 12px; cursor: pointer; }
         .nav-active { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
-        .item { height: 55px; border-radius: 6px; font-size: 6px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: white; animation: pop 0.3s ease; }
-        @keyframes pop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .item { height: 55px; border-radius: 6px; font-size: 6px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: white; }
         .god-relic { background: var(--god); color: #000; }
         .ultra-relic { background: var(--ur); }
         .ultra-rainbow { background: var(--urb); }
@@ -82,15 +78,13 @@
     </style>
 </head>
 <body>
-
 <div class="mobile-container">
     <div id="p-menu" class="page active-flex">
         <div class="title">IDOKU</div>
         <button class="play-btn" onclick="openClassSelect()">PLAY</button>
     </div>
-
     <div id="p-class-select" class="page">
-        <h2 style="color:var(--cyan); margin-bottom: 20px; font-size: 20px;">CHỌN CLASS</h2>
+        <h2 style="color:var(--cyan); margin-bottom: 20px;">CHỌN CLASS</h2>
         <div class="class-grid">
             <div class="class-card" onclick="selectClass('Kiếm Sĩ', '⚔️')"><i>⚔️</i><span>Kiếm Sĩ</span></div>
             <div class="class-card" onclick="selectClass('Đấu Sĩ', '🥊')"><i>🥊</i><span>Đấu Sĩ</span></div>
@@ -100,7 +94,6 @@
             <div class="class-card" onclick="selectClass('Sát Thủ', '🗡️')"><i>🗡️</i><span>Sát Thủ</span></div>
         </div>
     </div>
-
     <div id="ui-game">
         <div class="header-wallet">
             <div class="coin-slot" style="color:#ffd700">Gold: <span id="v-gold">0</span></div>
@@ -112,50 +105,42 @@
             <div id="p-lobby" class="page">
                 <div class="lobby-content">
                     <input type="file" id="av-file" hidden onchange="setAvatar(event)">
-                    <div class="avatar-box" onclick="document.getElementById('av-file').click()">
-                        <div id="av-img" style="font-size: 40px;">👤</div>
-                    </div>
-                    <div class="name-display">IDOKU</div>
-                    <div class="stat-label" style="margin-bottom: 2px;">EXP: <span id="xp-text">0/100</span></div>
+                    <div class="avatar-box" onclick="document.getElementById('av-file').click()"><div id="av-img" style="font-size: 40px;">👤</div></div>
+                    <div class="name-display" id="display-name" onclick="changeName()">IDOKU</div>
                     <div class="xp-container"><div id="xp-bar"></div></div>
                     <div class="stats-container">
-                        <div class="stat-item"><div class="stat-label">ATK</div><div class="stat-val">10</div></div>
-                        <div class="stat-item"><div class="stat-label">DEF</div><div class="stat-val">10</div></div>
-                        <div class="stat-item"><div class="stat-label">SPD</div><div class="stat-val">5</div></div>
+                        <div class="stat-item"><div class="stat-label">ATK</div><div class="stat-val" id="st-atk">10</div></div>
+                        <div class="stat-item"><div class="stat-label">MAX HP</div><div class="stat-val" id="st-hp">100</div></div>
+                        <div class="stat-item"><div class="stat-label">DEF</div><div class="stat-val" id="st-def">10</div></div>
                         <div class="stat-item"><div class="stat-label">CLASS</div><div id="display-class" class="stat-val">-</div></div>
                     </div>
                     <div class="inventory-box">
-                        <div class="stat-label" style="color:var(--cyan); border-bottom: 1px solid #333; padding-bottom: 5px;">KHO ĐỒ UNIT</div>
+                        <div class="stat-label" style="color:var(--cyan); border-bottom: 1px solid #333;">NHẤN ĐỂ TRANG BỊ UNIT</div>
                         <div id="inv-grid" class="inventory-grid"></div>
                     </div>
                 </div>
             </div>
             <div id="p-adventure" class="page">
-                <h3 style="color:var(--cyan); margin-top:20px;">KHU VỰC SLIME</h3>
+                <div style="padding:10px; width:80%">
+                    <div class="stat-label">IDOKU HP: <span id="cur-p-hp">100</span></div>
+                    <div class="hp-bar" style="width:100%"><div id="p-hp-fill" class="hp-fill" style="background:#00ff66; width:100%"></div></div>
+                </div>
+                <h3 id="mob-name" style="color:var(--cyan)">SLIME ZONE</h3>
                 <div class="slime-container">
                     <div class="hp-bar"><div id="hp-fill" class="hp-fill"></div></div>
                     <div class="slime" id="slime-mob" onclick="hitSlime()">💧</div>
-                    <p style="color:#666; font-size:10px;">Chạm liên tục để tiêu diệt Slime!</p>
+                    <p id="battle-log" style="color:#ff4d4d; font-size:10px; height:10px;"></p>
                 </div>
             </div>
             <div id="p-summon" class="page">
-                <div class="info-bar">
-                    <div class="pity-counter" id="pity-display">PITY: <span id="pity-count">0</span>/50</div>
-                </div>
+                <div class="info-bar"><div class="pity-counter">PITY: <span id="pity-count">0</span>/50</div></div>
                 <div class="main-content">
                     <div class="rarity-table" id="r-table"></div>
                     <div class="banner-card">
-                        <h4 style="margin:0; color:#ff00ff; font-size: 12px;">UNIT BANNER</h4>
+                        <h4 style="margin:0; color:#ff00ff;">UNIT BANNER</h4>
                         <div class="btn-group">
-                            <button class="summon btn-1" onclick="pull(1, 'Unit')">10 RBC [X1]</button>
-                            <button class="summon btn-10" onclick="pull(10, 'Unit')">100 RBC [X10]</button>
-                        </div>
-                    </div>
-                    <div class="banner-card">
-                        <h4 style="margin:0; color:#ffd700; font-size: 12px;">WEAPON BANNER</h4>
-                        <div class="btn-group">
-                            <button class="summon btn-1" onclick="pull(1, 'Weapon')">10 RBC [X1]</button>
-                            <button class="summon btn-10" onclick="pull(10, 'Weapon')">100 RBC [X10]</button>
+                            <button class="summon" style="background:#444;color:#fff" onclick="pull(1, 'Unit')">10 RBC [X1]</button>
+                            <button class="summon" style="background:#ffd700;color:#000" onclick="pull(10, 'Unit')">100 RBC [X10]</button>
                         </div>
                     </div>
                 </div>
@@ -169,140 +154,158 @@
         </div>
     </div>
 </div>
-
 <script>
-    let wallet = { gold: 0, rb: 100, lock: 0, god: 0 };
-    let player = { lv: 1, xp: 0, nextXp: 100 };
+    // 1. DỮ LIỆU CỐT LÕI
+    let wallet = { gold: 0, rb: 1000, god: 0 };
+    let player = { lv: 1, xp: 0, nextXp: 100, baseAtk: 10, baseDef: 10, baseHp: 100, curHp: 100, equippedIdx: null };
     let inventory = [];
     let pity = 0; 
-    let slimeHP = 100;
+    let mob = { hp: 100, maxHp: 100, type: 0, count: 0 };
+    let poisonTimer = null;
 
+    // 2. DANH SÁCH 10 CẤP BẬC (Giữ nguyên rate Shikami yêu cầu)
     const rates = [
-        { name: "God Relic", rate: 0.02, class: "god-relic", icon: "👑", color: "#ff0000", price: 1000, units: ["Idoku V1", "Idoku V2", "Ryuji", "Shikami"] },
-        { name: "Ultra Relic", rate: 0.2, class: "ultra-relic", icon: "💎", color: "#ff00ff", price: 500, units: ["Shinji", "Keita", "Noir Awakening", "Kyou"] },
-        { name: "Ultra Rainbow", rate: 2, class: "ultra-rainbow", icon: "🌟", color: "#00dbde", price: 200, units: ["Tora", "Noir"] },
-        { name: "Rainbow", rate: 10, class: "rainbow", icon: "🌈", color: "#ff2400", price: 100, units: ["Idoku Kid", "Teacher Idoku"] },
-        { name: "Heroic", rate: 21, class: "heroic", icon: "🔥", color: "#ff4500", price: 50, units: ["Dark Exblution"] },
-        { name: "Legendary", rate: 32, class: "legendary", icon: "⭐", color: "#ffd700", price: 30, units: ["Exblution"] },
-        { name: "Epic", rate: 55, class: "epic", icon: "🟣", color: "#a020f0", price: 20, units: ["Sứ giả thần chết"] },
-        { name: "Rare", rate: 60, class: "rare", icon: "🔵", color: "#1e90ff", price: 10, units: ["Pháp sư tập sự"] },
-        { name: "Uncommon", rate: 72, class: "uncommon", icon: "🟢", color: "#32cd32", price: 5, units: ["Lính cao cấp"] },
-        { name: "Common", rate: 80, class: "common", icon: "⚪", color: "#808080", price: 2, units: ["Lính canh", "Chó sói"] }
+        { name: "God Relic", rate: 0.1, class: "god-relic", icon: "👑", price: 5000, atk: 2000, hp: 10000, units: ["Idoku (Vua Các Vị Thần)", "Shikami (Ác Thần)"] },
+        { name: "Ultra Relic", rate: 0.5, class: "ultra-relic", icon: "💎", price: 2000, atk: 1000, hp: 5000, units: ["Thần Vô Cực - Creation", "Noir (God Form)"] },
+        { name: "Ultra Rainbow", rate: 1.5, class: "ultra-rainbow", icon: "🌌", price: 1000, atk: 600, hp: 3000, units: ["Hào Quang Vô Tận", "Sức Mạnh Sáng Tạo"] },
+        { name: "Rainbow", rate: 4.0, class: "rainbow", icon: "🌈", price: 500, atk: 350, hp: 1500, units: ["Idoku (Chiến Binh)", "Linh Hồn Đa Sắc"] },
+        { name: "Heroic", rate: 8.0, class: "heroic", icon: "🔥", price: 300, atk: 200, hp: 800, units: ["Anh Hùng Mạnh Nhất", "Kỵ Sĩ Viễn Chinh"] },
+        { name: "Legendary", rate: 15.0, class: "legendary", icon: "🌟", price: 200, atk: 120, hp: 500, units: ["Hiệu Trưởng Kyou", "Pháp Sư Tối Cao"] },
+        { name: "Epic", rate: 30.0, class: "epic", icon: "🟣", price: 100, atk: 70, hp: 250, units: ["Đội Trưởng Hoàng Gia", "Pháp Sư Bậc Thầy"] },
+        { name: "Rare", rate: 55.0, class: "rare", icon: "🔵", price: 50, atk: 40, hp: 120, units: ["Mạo Hiểm Giả Hạng A", "Cung Thủ Tinh Nhuệ"] },
+        { name: "Uncommon", rate: 80.0, class: "uncommon", icon: "🟢", price: 20, atk: 20, hp: 60, units: ["Mạo Hiểm Giả Hạng C", "Lính Gác Thành"] },
+        { name: "Common", rate: 100.0, class: "common", icon: "⚪", price: 5, atk: 8, hp: 30, units: ["Slime Thuần Hóa", "Dân Làng"] }
     ];
 
-    function openClassSelect() {
-        document.getElementById('p-menu').classList.remove('active-flex');
-        document.getElementById('p-class-select').classList.add('active-flex');
+    // NHÓM BẢO HIỂM (Chỉ rớt đúng 2 Unit này)
+    const pityPool = [
+        { name: "Idoku (Vua Các Vị Thần)", icon: "👑", class: "god-relic", atk: 2500, hp: 12000, price: 5000 },
+        { name: "Shikami (Ác Thần)", icon: "👑", class: "god-relic", atk: 2500, hp: 12000, price: 5000 }
+    ];
+
+    const slimeTypes = [
+        { name: "Slime Xanh", icon: "💧", hp: 100, dmg: 3 },
+        { name: "Slime Lửa", icon: "🔥", hp: 300, dmg: 10 },
+        { name: "Slime Độc", icon: "☣️", hp: 600, dmg: 20 },
+        { name: "KING SLIME (BOSS)", icon: "👑", hp: 3000, dmg: 50 }
+    ];
+
+    // 3. HIỂN THỊ BẢNG TỈ LỆ
+    function renderRarityTable() {
+        const table = document.getElementById('r-table');
+        if(!table) return;
+        table.innerHTML = '<div style="color:var(--cyan); font-weight:bold; margin-bottom:5px;">PHÂN CẤP & TỈ LỆ</div>';
+        let lastLimit = 0;
+        rates.forEach(r => {
+            let chance = r.rate - lastLimit;
+            table.innerHTML += `
+                <div class="rarity-row">
+                    <span class="${r.class}">${r.icon} ${r.name}</span>
+                    <span>${chance.toFixed(1)}%</span>
+                </div>`;
+            lastLimit = r.rate;
+        });
     }
 
-    function selectClass(className, icon) {
-        document.getElementById('display-class').innerText = className;
-        document.getElementById('av-img').innerText = icon;
-        document.getElementById('p-class-select').classList.remove('active-flex');
-        goTo('lobby');
-    }
-
-    function goTo(p) {
-        document.getElementById('ui-game').style.display = 'flex';
-        document.querySelectorAll('.content-area .page').forEach(page => page.classList.remove('active-flex'));
-        document.getElementById('p-' + p).classList.add('active-flex');
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
-        document.getElementById('nav-' + p).classList.add('nav-active');
-        updateUI();
-    }
-
-    function hitSlime() {
-        slimeHP -= 25; 
-        if (slimeHP <= 0) {
-            slimeHP = 100;
-            let dropped = Math.floor(Math.random() * 40) + 1;
-            wallet.rb += dropped;
-            gainXP(20);
-            spawnPop(dropped);
-        }
-        document.getElementById('hp-fill').style.width = slimeHP + "%";
-        updateUI();
-    }
-
-    function gainXP(amt) {
-        player.xp += amt;
-        if(player.xp >= player.nextXp) {
-            player.xp -= player.nextXp;
-            player.lv++;
-            player.nextXp = Math.floor(player.nextXp * 1.2);
-        }
-    }
-
-    function spawnPop(num) {
-        const mob = document.getElementById('slime-mob');
-        const txt = document.createElement('div');
-        txt.className = 'drop-text';
-        txt.innerText = "+" + num + " RBC";
-        mob.appendChild(txt);
-        setTimeout(() => txt.remove(), 800);
-    }
-
-    function setAvatar(e) {
-        if(e.target.files[0]) {
-            document.getElementById('av-img').innerHTML = `<img src="${URL.createObjectURL(e.target.files[0])}">`;
-        }
-    }
-
-    function updateUI() {
-        document.getElementById('v-gold').innerText = wallet.gold.toLocaleString();
-        document.getElementById('v-rb').innerText = wallet.rb.toLocaleString();
-        document.getElementById('v-lv').innerText = player.lv;
-        document.getElementById('v-godc').innerText = wallet.god.toLocaleString();
-        document.getElementById('xp-text').innerText = `${player.xp}/${player.nextXp}`;
-        document.getElementById('xp-bar').style.width = (player.xp / player.nextXp * 100) + "%";
-        document.getElementById('pity-count').innerText = pity;
-        let rt = "";
-        rates.forEach(r => { rt += `<div class="rarity-row"><span style="color:${r.color}">${r.name}</span><span>${r.rate}%</span></div>`; });
-        document.getElementById('r-table').innerHTML = rt;
-        renderInventory();
-    }
-
-    function pull(times, type) {
-        let cost = (times === 1) ? 10 : 100;
-        if (wallet.rb < cost) return alert("Bạn không đủ RBC!");
-        wallet.rb -= cost;
+    // 4. HỆ THỐNG PULL (Pity chỉ reset khi đạt mốc bảo hiểm)
+    function pull(times) {
+        if (wallet.rb < times * 10) return alert("Không đủ RBC!");
+        wallet.rb -= times * 10;
         const resDiv = document.getElementById('results');
-        resDiv.innerHTML = ''; 
+        resDiv.innerHTML = '';
+
         for (let i = 0; i < times; i++) {
-            let res;
-            let rNormal = Math.random() * 100;
-            for (let t of rates) { if (rNormal <= t.rate) { res = t; break; } }
-            if (!res) res = rates[rates.length - 1]; 
-            let unitName = res.units[Math.floor(Math.random() * res.units.length)];
-            resDiv.innerHTML += `<div class="item ${res.class}"><span>${res.icon}</span>${unitName}</div>`;
-            if(type === 'Unit') {
-                inventory.push({ name: unitName, icon: res.icon, rarityName: res.name, rarityClass: res.class, price: res.price });
+            pity++; 
+            let resUnit;
+
+            // KIỂM TRA BẢO HIỂM: Phải đạt tới 51 mới reset
+            if (pity > 50) {
+                let picked = pityPool[Math.floor(Math.random() * pityPool.length)];
+                resUnit = {
+                    name: picked.name, icon: picked.icon, rarityClass: picked.class,
+                    atk: picked.atk, hp: picked.hp, price: picked.price
+                };
+                pity = 1; // RESET VỀ 1 CHỈ TẠI ĐÂY
+            } else {
+                let r = Math.random() * 100;
+                let rarityRes = rates.find(x => r <= x.rate);
+                
+                // Dù quay ra hàng hiếm (Ultra Rainbow trở lên) cũng KHÔNG reset Pity
+                resUnit = {
+                    name: rarityRes.units[Math.floor(Math.random() * rarityRes.units.length)],
+                    icon: rarityRes.icon,
+                    rarityClass: rarityRes.class,
+                    atk: rarityRes.atk,
+                    hp: rarityRes.hp,
+                    price: rarityRes.price
+                };
             }
-            if (res.name === "God Relic") wallet.god += 1;
+            
+            inventory.push(resUnit);
+            resDiv.innerHTML += `<div class="item ${resUnit.rarityClass}">${resUnit.icon}<br>${resUnit.name}</div>`;
         }
         updateUI();
     }
 
-    function renderInventory() {
+    // 5. CẬP NHẬT GIAO DIỆN
+    function updateUI() {
+        let bAtk = player.equippedIdx !== null ? inventory[player.equippedIdx].atk : 0;
+        let bHp = player.equippedIdx !== null ? inventory[player.equippedIdx].hp : 0;
+
+        document.getElementById('v-rb').innerText = Math.floor(wallet.rb);
+        document.getElementById('v-lv').innerText = player.lv;
+        document.getElementById('st-atk').innerText = player.baseAtk + bAtk;
+        document.getElementById('st-hp').innerText = player.baseHp + bHp;
+        document.getElementById('cur-p-hp').innerText = Math.floor(player.curHp);
+        document.getElementById('pity-count').innerText = (pity > 50) ? "50/50" : pity;
+
+        document.getElementById('p-hp-fill').style.width = (player.curHp / (player.baseHp + bHp) * 100) + "%";
+        document.getElementById('hp-fill').style.width = (mob.hp / mob.maxHp * 100) + "%";
+        document.getElementById('xp-bar').style.width = (player.xp / player.nextXp * 100) + "%";
+
         const invGrid = document.getElementById('inv-grid');
         invGrid.innerHTML = '';
         inventory.forEach((item, index) => {
             const div = document.createElement('div');
-            div.className = `inv-item ${item.rarityClass}`;
-            div.innerHTML = `
-                <div style="font-size:20px;">${item.icon}</div>
-                <div class="inv-item-name">${item.name}</div>
-                <button class="sell-btn" onclick="sellUnit(${index})">Bán: ${item.price}</button>`;
+            div.className = `inv-item ${item.rarityClass} ${player.equippedIdx === index ? 'equipped' : ''}`;
+            div.onclick = () => toggleEquip(index);
+            div.innerHTML = `${item.icon}<div class="inv-item-name">${item.name}</div><button class="sell-btn" onclick="event.stopPropagation(); sellUnit(${index})">Bán</button>`;
             invGrid.appendChild(div);
         });
     }
 
-    function sellUnit(index) {
-        wallet.rb += inventory[index].price;
-        inventory.splice(index, 1);
+    // 6. CÁC HÀM GAMEPLAY KHÁC (GIỮ NGUYÊN)
+    function goTo(p) {
+        document.getElementById('ui-game').style.display = 'flex';
+        document.querySelectorAll('.content-area .page').forEach(pg => pg.classList.remove('active-flex'));
+        document.getElementById('p-' + p).classList.add('active-flex');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
+        const nav = document.getElementById('nav-' + p); if(nav) nav.classList.add('nav-active');
+        if(p === 'adventure') startBattle(); else stopBattle();
+        if(p === 'summon') renderRarityTable();
         updateUI();
     }
+    function hitSlime() {
+        let bAtk = player.equippedIdx !== null ? inventory[player.equippedIdx].atk : 0;
+        mob.hp -= (player.baseAtk + bAtk);
+        if (mob.hp <= 0) { mob.count++; wallet.rb += 30; gainXP(40); spawnNewMob(); }
+        updateUI();
+    }
+    function spawnNewMob() {
+        mob.type = (mob.count % 10 === 0 && mob.count !== 0) ? 3 : Math.floor(Math.random() * 3);
+        mob.maxHp = slimeTypes[mob.type].hp + (player.lv * 70);
+        mob.hp = mob.maxHp;
+        document.getElementById('mob-name').innerText = slimeTypes[mob.type].name;
+        document.getElementById('slime-mob').innerText = slimeTypes[mob.type].icon;
+    }
+    function startBattle() { if(poisonTimer) return; poisonTimer = setInterval(() => { player.curHp -= slimeTypes[mob.type].dmg; if(player.curHp <= 0) { alert("Thất bại!"); goTo('lobby'); } updateUI(); }, 1500); }
+    function stopBattle() { clearInterval(poisonTimer); poisonTimer = null; let bHp = player.equippedIdx !== null ? inventory[player.equippedIdx].hp : 0; player.curHp = player.baseHp + bHp; }
+    function toggleEquip(idx) { player.equippedIdx = (player.equippedIdx === idx) ? null : idx; updateUI(); }
+    function sellUnit(idx) { if(player.equippedIdx === idx) player.equippedIdx = null; wallet.rb += inventory[idx].price; inventory.splice(idx, 1); updateUI(); }
+    function gainXP(amt) { player.xp += amt; if(player.xp >= player.nextXp) { player.lv++; player.xp = 0; player.nextXp *= 1.3; player.baseAtk += 25; player.baseHp += 150; } }
+    function openClassSelect() { document.getElementById('p-menu').classList.remove('active-flex'); document.getElementById('p-class-select').classList.add('active-flex'); }
+    function selectClass(c, i) { document.getElementById('display-class').innerText = c; document.getElementById('av-img').innerText = i; document.getElementById('p-class-select').classList.remove('active-flex'); goTo('lobby'); }
+    function changeName() { let n = prompt("Tên của cậu:"); if(n) document.getElementById('display-name').innerText = n.toUpperCase(); }
+
     updateUI();
 </script>
-</body>
-</html>
