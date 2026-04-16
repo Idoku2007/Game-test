@@ -35,7 +35,7 @@
         .header-wallet { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; padding: 60px 10px 10px; background: #1a1a1a; }
         .coin-slot { background: #000; padding: 5px; border-radius: 8px; font-size: 9px; border: 1px solid #333; text-align: center; font-weight: bold; }
         .content-area { flex: 1; position: relative; overflow: hidden; background: #121212; }
-        .lobby-content { padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; overflow-y: auto; height: 100%; }
+        .lobby-content { padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; overflow-y: auto; height: 100%; scrollbar-width: none; }
         .avatar-box { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--cyan); margin-bottom: 10px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; position: relative; }
         .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
         .avatar-box .edit-tag { position: absolute; bottom: 0; background: rgba(0,0,0,0.6); width: 100%; font-size: 8px; color: var(--cyan); padding: 2px 0; }
@@ -43,11 +43,12 @@
         .xp-container { width: 100%; background: #222; height: 10px; border-radius: 5px; margin-bottom: 15px; overflow: hidden; border: 1px solid #333; }
         #xp-bar { height: 100%; background: var(--cyan); width: 0%; transition: 0.3s; }
         .stats-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
-        .stat-item { background: #1a1a1a; padding: 8px; border-radius: 12px; border-left: 3px solid var(--cyan); text-align: left; }
+        .stat-item { background: #1a1a1a; padding: 8px; border-radius: 12px; border-left: 3px solid var(--cyan); text-align: left; position: relative; }
         .stat-label { font-size: 8px; color: #666; text-transform: uppercase; }
         .stat-val { font-size: 12px; font-weight: 900; color: #fff; }
-        
-        /* Cập nhật khu vực rương */
+        .add-btn { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; background: var(--cyan); color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; display: none; align-items: center; justify-content: center; }
+        .points-alert { background: #ff4500; color: #fff; font-size: 9px; padding: 2px 10px; border-radius: 10px; margin-bottom: 5px; display: none; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
         .extra-inv { width: 100%; margin-top: 10px; display: flex; flex-direction: column; gap: 5px; background: #1a1a1a; padding: 10px; border-radius: 12px; box-sizing: border-box; border: 1px dashed #333; }
         .chest-info { display: flex; justify-content: space-around; width: 100%; margin-bottom: 5px; }
         .chest-btns { display: flex; gap: 5px; justify-content: center; width: 100%; }
@@ -55,7 +56,6 @@
         .extra-slot span { font-size: 16px; display: block; }
         .extra-slot b { font-size: 10px; color: var(--cyan); }
         .open-chest-btn { padding: 4px 6px; font-size: 8px; background: var(--gold); border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #000; flex: 1; }
-
         .code-input-group { margin-top: 15px; display: flex; gap: 5px; width: 100%; }
         .code-field { flex: 1; background: #222; border: 1px solid #333; border-radius: 8px; color: var(--cyan); padding: 8px; font-size: 10px; outline: none; }
         .code-btn { background: var(--cyan); border: none; border-radius: 8px; padding: 0 15px; font-weight: bold; font-size: 10px; cursor: pointer; color: #000; }
@@ -65,14 +65,11 @@
         .inv-item.equipped { border: 2px solid var(--cyan); box-shadow: 0 0 10px var(--cyan); transform: scale(1.05); }
         .inv-item .sell-btn { background: #ff4d4d; border: none; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-top: 5px; cursor: pointer; width: 100%; }
         .inv-item-name { font-size: 9px; font-weight: bold; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        
-        /* Modal Đăng Nhập */
         #login-modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .login-card { background: #1a1a1a; padding: 20px; border-radius: 20px; border: 2px solid var(--cyan); width: 80%; }
         .login-day-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin: 15px 0; }
         .day-box { background: #333; font-size: 8px; padding: 5px; border-radius: 5px; opacity: 0.5; }
         .day-box.active { opacity: 1; border: 1px solid var(--gold); background: #444; }
-
         #p-adventure { justify-content: center; align-items: center; text-align: center; }
         .slime-container { margin-top: 20px; position: relative; width: 100%; }
         .slime { width: 140px; height: 140px; background: #32cd32; border-radius: 50% 50% 40% 40%; margin: 20px auto; cursor: pointer; border: 5px solid #228b22; display: flex; align-items: center; justify-content: center; font-size: 50px; transition: 0.1s; box-shadow: 0 8px 0 #228b22; position: relative; z-index: 10; }
@@ -137,7 +134,7 @@
 
     <div id="p-menu" class="page active-flex">
         <div class="title">ADVENTURE ENDLESS DEMO</div>
-        <div class="version">v0.2.1 beta</div>
+        <div class="version">v0.3.0 beta</div>
         <button class="play-btn" data-t="play" onclick="openClassSelect()">PLAY</button>
         <div class="save-load-group">
             <button class="menu-sub-btn" data-t="save" onclick="saveGame()">SAVE</button>
@@ -175,7 +172,10 @@
                         <div class="edit-tag">EDIT</div>
                     </div>
                     <div class="name-display" id="display-name" onclick="changeName()">IDOKU</div>
-                    <div style="font-size: 10px; color: var(--cyan); margin-bottom: 5px;">LV: <span id="v-lv">1</span></div>
+                    
+                    <div id="points-alert" class="points-alert">AVAILABLE: <span id="v-points">0</span> POINTS</div>
+
+                    <div style="font-size: 10px; color: var(--cyan); margin-bottom: 5px;">LV: <span id="v-lv">1</span> / 10,000</div>
                     <div class="xp-container"><div id="xp-bar"></div></div>
                     
                     <div class="extra-inv">
@@ -194,12 +194,29 @@
                         <input type="text" class="code-field" id="giftcode-input" placeholder="NHẬP GIFTCODE...">
                         <button class="code-btn" data-t="codeEnter" onclick="useCode()">NHẬP</button>
                     </div>
+
                     <div class="stats-container" style="margin-top:10px;">
-                        <div class="stat-item"><div class="stat-label">ATK</div><div class="stat-val" id="st-atk">10</div></div>
-                        <div class="stat-item"><div class="stat-label">MAX HP</div><div class="stat-val" id="st-hp">100</div></div>
-                        <div class="stat-item"><div class="stat-label">DEF</div><div class="stat-val" id="st-def">10</div></div>
-                        <div class="stat-item"><div class="stat-label" data-t="classLabel">CLASS</div><div id="display-class" class="stat-val">-</div></div>
+                        <div class="stat-item">
+                            <div class="stat-label">ATK</div><div class="stat-val" id="st-atk">10</div>
+                            <button class="add-btn" onclick="addStat('atk')">+</button>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">MAX HP</div><div class="stat-val" id="st-hp">100</div>
+                            <button class="add-btn" onclick="addStat('hp')">+</button>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">DEF</div><div class="stat-val" id="st-def">10</div>
+                            <button class="add-btn" onclick="addStat('def')">+</button>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">LUCK</div><div class="stat-val" id="st-luck">1</div>
+                            <button class="add-btn" onclick="addStat('luck')">+</button>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label" data-t="classLabel">CLASS</div><div id="display-class" class="stat-val">-</div>
+                        </div>
                     </div>
+
                     <div class="inventory-box">
                         <div class="stat-label" style="color:var(--cyan); border-bottom: 1px solid #333;" data-t="invLabel">NHẤN ĐỂ TRANG BỊ UNIT</div>
                         <div id="inv-grid" class="inventory-grid"></div>
@@ -229,7 +246,7 @@
                 </div>
             </div>
             <div id="p-summon" class="page">
-                <div class="info-bar"><div class="pity-counter">PITY: <span id="pity-count">0</span>/50</div></div>
+                <div class="info-bar"><div class="pity-counter">PITY: <span id="pity-count">0</span>/100</div></div>
                 <div class="main-content">
                     <div class="rarity-table" id="r-table"></div>
                     <div class="banner-card">
@@ -256,8 +273,9 @@
     let randomID = Math.floor(10000 + Math.random() * 90000);
     let playerName = "USER" + randomID;
     let customAvatar = null;
+    // BẮT ĐẦU VỀ 0 NHƯ YÊU CẦU
     let wallet = { gold: 0, rb: 0, god: 0, chest: 0, key: 0 }; 
-    let player = { lv: 1, xp: 0, nextXp: 100, baseAtk: 10, baseDef: 10, baseHp: 100, curHp: 100, equippedIdx: null, class: "", burnTicks: 0, freezeTicks: 0, stunTicks: 0 };
+    let player = { lv: 1, xp: 0, nextXp: 100, points: 0, luck: 1, baseAtk: 10, baseDef: 10, baseHp: 100, curHp: 100, equippedIdx: null, class: "", burnTicks: 0, freezeTicks: 0, stunTicks: 0 };
     let usedCodes = [];
     let debuffCooldown = 0;
     let skillCooldown = 0;
@@ -267,7 +285,6 @@
     let battleTimer = null;
     let currentLang = 'vi';
 
-    // Data mới: Đăng nhập
     let loginData = { lastClaim: null, streak: 0 };
 
     const lang = {
@@ -303,6 +320,7 @@
         }
     };
 
+    // CẬP NHẬT RATE MỚI
     const rates = [
         { name: "God Relic", rate: 0.02, class: "god-relic", icon: "👑", price: 5000, atk: 2000, hp: 10000, units: ["Idoku (God)", "Shikami (Evil God)"] },
         { name: "Ultra Relic", rate: 0.5, class: "ultra-relic", icon: "💎", price: 2000, atk: 1000, hp: 5000, units: ["God Infinity - Creation", "Noir (God Form)"] },
@@ -311,14 +329,17 @@
         { name: "Heroic", rate: 8.0, class: "heroic", icon: "🔥", price: 300, atk: 200, hp: 800, units: ["Strongest Hero", "Crusade Knight"] },
         { name: "Legendary", rate: 15.0, class: "legendary", icon: "🌟", price: 200, atk: 120, hp: 500, units: ["Principal Kyou", "High Mage"] },
         { name: "Epic", rate: 25.0, class: "epic", icon: "🟣", price: 100, atk: 70, hp: 250, units: ["Royal Captain", "Master Mage"] },
-        { name: "Rare", rate: 40.0, class: "rare", icon: "🔵", price: 50, atk: 40, hp: 120, units: ["Rank A Adventurer", "Elite Archer"] },
-        { name: "Uncommon", rate: 50.0, class: "uncommon", icon: "🟢", price: 20, atk: 20, hp: 60, units: ["Rank C Adventurer", "Guard"] },
+        { name: "Rare", rate: 32.0, class: "rare", icon: "🔵", price: 50, atk: 40, hp: 120, units: ["Rank A Adventurer", "Elite Archer"] },
+        { name: "Uncommon", rate: 40.0, class: "uncommon", icon: "🟢", price: 20, atk: 20, hp: 60, units: ["Rank C Adventurer", "Guard"] },
         { name: "Common", rate: 100.0, class: "common", icon: "⚪", price: 5, atk: 8, hp: 30, units: ["Tamed Slime", "Villager"] }
     ];
 
-    const pityPool = [
+    // POOL KHI PITY 101 (TỪ ULTRA RAINBOW TRỞ LÊN)
+    const highPityPool = [
         { name: "Idoku (God)", icon: "👑", class: "god-relic", atk: 2500, hp: 12000, price: 5000 },
-        { name: "Shikami (Evil God)", icon: "👑", class: "god-relic", atk: 2500, hp: 12000, price: 5000 }
+        { name: "Shikami (Evil God)", icon: "👑", class: "god-relic", atk: 2500, hp: 12000, price: 5000 },
+        { name: "God Infinity - Creation", icon: "💎", class: "ultra-relic", atk: 1200, hp: 6000, price: 2000 },
+        { name: "Infinite Aura", icon: "🌌", class: "ultra-rainbow", atk: 700, hp: 3500, price: 1000 }
     ];
 
     const slimeTypes = [
@@ -330,15 +351,32 @@
         { name: "KING SLIME (BOSS)", icon: "👑", hp: 1500, dmg: 50, debuff: "boss_rage" }
     ];
 
-    // --- Tính năng Đăng nhập qua ngày (Reset 0:00 VN) ---
+    function addStat(type) {
+        if(player.points <= 0) return;
+        player.points--;
+        if(type === 'atk') player.baseAtk += 10;
+        if(type === 'hp') player.baseHp += 50;
+        if(type === 'def') player.baseDef += 5;
+        if(type === 'luck') player.luck += 1;
+        updateUI();
+    }
+
+    function gainXP(amt) {
+        if(player.lv >= 10000) return;
+        player.xp += amt;
+        while(player.xp >= player.nextXp && player.lv < 10000) {
+            player.lv++;
+            player.xp -= player.nextXp;
+            player.points += 5; 
+            player.nextXp = Math.floor(player.nextXp * 1.2) + (player.lv * 10);
+        }
+    }
+
     function checkDailyLogin() {
         const now = new Date();
-        // Chuyển sang giờ VN (GMT+7)
         const vnTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
         const todayStr = vnTime.toISOString().split('T')[0];
-
         if (loginData.lastClaim !== todayStr) {
-            // Nếu bỏ lỡ ngày, reset streak hoặc tính tiếp tùy logic, ở đây là tính tiếp 7 ngày
             if (loginData.streak >= 7) loginData.streak = 0;
             showLoginModal();
         }
@@ -357,7 +395,6 @@
         loginData.streak++;
         const s = loginData.streak;
         let giftMsg = "";
-
         if (s === 1) { wallet.rb += 20; giftMsg = "20 RBC"; }
         else if (s === 2) { wallet.rb += 40; giftMsg = "40 RBC"; }
         else if (s === 3) { wallet.rb += 60; giftMsg = "60 RBC"; }
@@ -365,15 +402,13 @@
         else if (s === 5) { wallet.rb += 100; wallet.gold += 20000; giftMsg = "100 RBC + 20,000 Gold"; }
         else if (s === 6) { wallet.rb += 120; giftMsg = "120 RBC"; }
         else if (s === 7) { wallet.god += 5; giftMsg = "5 GOD COIN"; }
-
         const now = new Date();
         const vnTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
         loginData.lastClaim = vnTime.toISOString().split('T')[0];
-
         alert("Bạn đã nhận thưởng ngày " + s + ": " + giftMsg);
         document.getElementById('login-modal').style.display = 'none';
         updateUI();
-        saveGame();
+        saveGame(true);
     }
 
     function setAvatar(e) {
@@ -397,14 +432,14 @@
         }
     }
 
-    function saveGame() {
+    function saveGame(silent) {
         const gameData = { wallet, player, inventory, pity, mobCount: mob.count, playerName, customAvatar, usedCodes, loginData };
-        localStorage.setItem('adv_endless_v2_3', JSON.stringify(gameData));
-        if(arguments.length === 0) alert(lang[currentLang].saved);
+        localStorage.setItem('adv_endless_v3_0', JSON.stringify(gameData));
+        if(!silent) alert(lang[currentLang].saved);
     }
 
     function loadGame() {
-        const data = localStorage.getItem('adv_endless_v2_3');
+        const data = localStorage.getItem('adv_endless_v3_0');
         if(!data) return alert(lang[currentLang].noSave);
         const parsed = JSON.parse(data);
         wallet = parsed.wallet;
@@ -491,8 +526,22 @@
         document.getElementById('v-lv').innerText = player.lv;
         document.getElementById('st-atk').innerText = (player.class === "Kiếm Sĩ" ? 50 : player.baseAtk) + bAtk;
         document.getElementById('st-hp').innerText = player.baseHp + bHp;
+        document.getElementById('st-def').innerText = player.baseDef;
+        document.getElementById('st-luck').innerText = player.luck;
         document.getElementById('cur-p-hp').innerText = Math.floor(player.curHp);
         document.getElementById('display-name').innerText = playerName;
+        
+        document.getElementById('v-points').innerText = player.points;
+        const pAlert = document.getElementById('points-alert');
+        const addBtns = document.querySelectorAll('.add-btn');
+        if(player.points > 0) {
+            pAlert.style.display = 'block';
+            addBtns.forEach(b => b.style.display = 'flex');
+        } else {
+            pAlert.style.display = 'none';
+            addBtns.forEach(b => b.style.display = 'none');
+        }
+
         let status = "";
         if(player.burnTicks > 0) status += " 🔥[" + player.burnTicks + "s]";
         if(player.freezeTicks > 0) status += " ❄️[" + player.freezeTicks + "s]";
@@ -500,7 +549,7 @@
         if(debuffCooldown > 0 && player.stunTicks === 0 && player.freezeTicks === 0) status += " 🛡️CD[" + debuffCooldown + "s]";
         if(mob.type === 5 && mob.hp < (mob.maxHp * 0.5)) status += " ⚔️↑[RAGE]";
         document.getElementById('status-tag').innerText = status;
-        document.getElementById('pity-count').innerText = (pity > 50) ? "50/50" : pity;
+        document.getElementById('pity-count').innerText = (pity > 100) ? "100/100" : pity;
         document.getElementById('p-hp-fill').style.width = (player.curHp / (player.baseHp + bHp) * 100) + "%";
         document.getElementById('mob-hp-val').innerText = `${Math.max(0, Math.floor(mob.hp))} / ${mob.maxHp}`;
         document.getElementById('hp-fill').style.width = (mob.hp / mob.maxHp * 100) + "%";
@@ -524,15 +573,10 @@
         document.getElementById('skill-box').style.display = (player.class === "Kiếm Sĩ") ? "block" : "none";
     }
 
-    // --- Tính năng Mở Rương x1, x10, x100 ---
+    // CẬP NHẬT MỞ RƯƠNG NHẬN TRỰC TIẾP
     function openChest(times) {
         if(wallet.chest < times || wallet.key < times) return alert(lang[currentLang].chestReq);
-        
-        let totalGold = 0;
-        let totalRb = 0;
-        let totalGod = 0;
-        let resultsCount = 0;
-
+        let totalGold = 0; let totalRb = 0; let totalGod = 0;
         for(let i=0; i<times; i++) {
             wallet.chest--; wallet.key--;
             let r = Math.random() * 100;
@@ -540,13 +584,15 @@
             else if (r < 11) { totalGod += 1; }
             else if (r < 40) { totalGold += Math.floor(Math.random() * 15001) + 5000; }
         }
-
-        wallet.rb += totalRb;
-        wallet.gold += totalGold;
-        wallet.god += totalGod;
-
-        let finalMsg = `BẠN ĐÃ MỞ ${times} RƯƠNG:\n- Gold: +${totalGold.toLocaleString()}\n- RBC: +${totalRb}\n- God Coin: +${totalGod}`;
-        alert(finalMsg);
+        wallet.rb += totalRb; wallet.gold += totalGold; wallet.god += totalGod;
+        
+        let msg = `BẠN ĐÃ MỞ ${times} RƯƠNG:`;
+        if(totalGold > 0) msg += `\n- Gold: +${totalGold.toLocaleString()}`;
+        if(totalRb > 0) msg += `\n- RBC: +${totalRb}`;
+        if(totalGod > 0) msg += `\n- God Coin: +${totalGod}`;
+        if(totalGold === 0 && totalRb === 0 && totalGod === 0) msg += `\n- ${lang[currentLang].chestEmpty}`;
+        
+        alert(msg);
         updateUI();
     }
 
@@ -556,11 +602,8 @@
         if(usedCodes.includes(code)) { alert(lang[currentLang].codeUsed); return; }
         if(code === "DEMO") {
             wallet.rb += 500; wallet.gold += 2000000; wallet.chest += 5; wallet.key += 5;
-            usedCodes.push(code);
-            alert(lang[currentLang].codeDemo + " (+500 RBC, +2M Gold, +5 Chest/Key)");
-        } else {
-            alert(lang[currentLang].codeInvalid);
-        }
+            usedCodes.push(code); alert(lang[currentLang].codeDemo + " (+500 RBC, +2M Gold, +5 Chest/Key)");
+        } else { alert(lang[currentLang].codeInvalid); }
         document.getElementById('giftcode-input').value = "";
         updateUI();
     }
@@ -568,14 +611,16 @@
     function hitSlime() {
         if(player.stunTicks > 0 || player.freezeTicks > 0) return;
         let bAtk = player.equippedIdx !== null ? inventory[player.equippedIdx].atk : 0;
+        let isCrit = (Math.random() * 100 < (player.luck * 0.5));
         let dmg = (player.class === "Kiếm Sĩ") ? 50 + bAtk : player.baseAtk + bAtk; 
+        if(isCrit) dmg = Math.floor(dmg * 2.5);
+
         mob.hp -= dmg;
-        document.getElementById('battle-log').innerText = lang[currentLang].logHit + dmg;
+        document.getElementById('battle-log').innerText = (isCrit ? "CRIT! " : "") + lang[currentLang].logHit + dmg;
         if (mob.hp <= 0) { 
-            mob.count++; 
-            gainXP(40); 
-            if(Math.random() < 0.25) { wallet.chest++; document.getElementById('battle-log').innerText = lang[currentLang].dropChest; }
-            if(Math.random() < 0.25) { wallet.key++; document.getElementById('battle-log').innerText = lang[currentLang].dropKey; }
+            mob.count++; gainXP(40); 
+            if(Math.random() < (0.25 + (player.luck * 0.01))) { wallet.chest++; }
+            if(Math.random() < (0.25 + (player.luck * 0.01))) { wallet.key++; }
             spawnNewMob(); 
         }
         updateUI();
@@ -599,16 +644,9 @@
                 clearInterval(countdown);
                 btn.innerText = lang[currentLang].skillName + " (50 DMG)";
                 btn.disabled = (player.stunTicks > 0 || player.freezeTicks > 0);
-            } else {
-                btn.innerText = `${lang[currentLang].skillCd} (${skillCooldown}s)`;
-            }
+            } else { btn.innerText = `${lang[currentLang].skillCd} (${skillCooldown}s)`; }
         }, 1000);
-        if (mob.hp <= 0) { 
-            mob.count++; gainXP(40); 
-            if(Math.random() < 0.25) wallet.chest++;
-            if(Math.random() < 0.25) wallet.key++;
-            spawnNewMob(); 
-        }
+        if (mob.hp <= 0) { mob.count++; gainXP(40); spawnNewMob(); }
         updateUI();
     }
 
@@ -637,8 +675,8 @@
     function selectClass(c, i) { player.class = c; document.getElementById('display-class').innerText = c; document.getElementById('p-class-select').classList.remove('active-flex'); goTo('lobby'); }
     function toggleEquip(idx) { player.equippedIdx = (player.equippedIdx === idx) ? null : idx; updateUI(); }
     function sellUnit(idx) { if(player.equippedIdx === idx) player.equippedIdx = null; wallet.gold += inventory[idx].price; inventory.splice(idx, 1); updateUI(); }
-    function gainXP(amt) { player.xp += amt; if(player.xp >= player.nextXp) { player.lv++; player.xp = 0; player.nextXp *= 1.3; player.baseAtk += 20; player.baseHp += 100; } }
 
+    // CẬP NHẬT LOGIC PITY 100 + 1
     function pull(times, currency) {
         if(currency === 'rb') {
             let cost = times === 1 ? 100 : 1000;
@@ -656,11 +694,11 @@
         for (let i = 0; i < times; i++) {
             pity++; 
             let resUnit;
-            if (pity > 50) {
-                wallet.god += 1; 
-                let picked = pityPool[Math.floor(Math.random() * pityPool.length)];
+            // KHI PITY ĐẠT 101 (TỨC LÀ LƯỢT TIẾP THEO SAU 100)
+            if (pity > 100) {
+                let picked = highPityPool[Math.floor(Math.random() * highPityPool.length)];
                 resUnit = { name: picked.name, icon: picked.icon, rarityClass: picked.class, atk: picked.atk, hp: picked.hp, price: picked.price };
-                pity = 1; 
+                pity = 0; // RESET VỀ 0
             } else {
                 let r = Math.random() * 100;
                 let rarityRes = rates.find(x => r <= x.rate);
@@ -684,7 +722,6 @@
         });
     }
     
-    // Khởi tạo ban đầu
     window.onload = () => {
         updateUI();
         checkDailyLogin();
