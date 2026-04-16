@@ -151,12 +151,12 @@
                     <div style="font-size: 10px; color: var(--cyan); margin-bottom: 5px;">LV: <span id="v-lv">1</span></div>
                     <div class="xp-container"><div id="xp-bar"></div></div>
                     <div class="extra-inv">
-                        <div class="extra-slot"><span>📦</span><b>RƯƠNG: <span id="v-chest">0</span></b><br><button class="open-chest-btn" onclick="openChest()">MỞ RƯƠNG</button></div>
-                        <div class="extra-slot"><span>🔑</span><b>CHÌA: <span id="v-key">0</span></b></div>
+                        <div class="extra-slot"><span>📦</span><b><span data-t="chestLabel">RƯƠNG</span>: <span id="v-chest">0</span></b><br><button class="open-chest-btn" data-t="openBtn" onclick="openChest()">MỞ RƯƠNG</button></div>
+                        <div class="extra-slot"><span>🔑</span><b><span data-t="keyLabel">CHÌA</span>: <span id="v-key">0</span></b></div>
                     </div>
                     <div class="code-input-group">
                         <input type="text" class="code-field" id="giftcode-input" placeholder="NHẬP GIFTCODE...">
-                        <button class="code-btn" onclick="useCode()">NHẬP</button>
+                        <button class="code-btn" data-t="codeEnter" onclick="useCode()">NHẬP</button>
                     </div>
                     <div class="stats-container" style="margin-top:10px;">
                         <div class="stat-item"><div class="stat-label">ATK</div><div class="stat-val" id="st-atk">10</div></div>
@@ -186,7 +186,7 @@
                     <p id="battle-log" style="color:#ff4d4d; font-size:10px; height:10px;"></p>
                     <div id="action-box">
                         <div id="skill-box" style="display:none;">
-                            <button class="skill-btn" id="main-skill-btn" onclick="nhatKiemTram()">Nhất Kiếm Trảm Tà Ma ⚔️ (50 DMG)</button>
+                            <button class="skill-btn" id="main-skill-btn" onclick="nhatKiemTram()">Skill Name</button>
                         </div>
                         <button class="normal-hit-btn" id="normal-hit-btn" data-t="normalHit" onclick="hitSlime()">ĐÁNH THƯỜNG ⚡</button>
                     </div>
@@ -200,7 +200,7 @@
                         <h4 style="margin:0; color:#ff00ff;" data-t="bannerTitle">UNIT BANNER</h4>
                         <div class="btn-group">
                             <button class="summon" style="background:#444;color:#fff" onclick="pull(1, 'rb')">100 RBC [X1]</button>
-                            <button class="summon" style="background:#222;color:var(--gold); border:1px solid var(--gold)" onclick="pull(1, 'gold')">200,000 GOLD [X1]</button>
+                            <button class="summon" style="background:#222;color:var(--gold); border:1px solid var(--gold)" onclick="pull(10, 'gold')">2,000,000 GOLD [X10]</button>
                             <button class="summon" style="background:#ffd700;color:#000" onclick="pull(10, 'rb')">1000 RBC [X10]</button>
                             <button class="summon" style="background:var(--god);color:#000" onclick="pull(10, 'god')">1 GOD COIN [X10]</button>
                         </div>
@@ -241,7 +241,11 @@
             navLobby: "LOBBY", navAdventure: "ADVENTURE", navSummon: "SUMMON",
             saved: "Đã lưu tiến trình!", noSave: "Không tìm thấy bản lưu!",
             welcome: "Chào mừng trở lại!", fail: "Thất bại!", askName: "Nhập tên mới:",
-            rarityTitle: "PHÂN CẤP & TỈ LỆ", sell: "Bán"
+            rarityTitle: "PHÂN CẤP & TỈ LỆ", sell: "Bán",
+            chestLabel: "RƯƠNG", keyLabel: "CHÌA", openBtn: "MỞ RƯƠNG", codeEnter: "NHẬP", codePh: "NHẬP GIFTCODE...",
+            chestReq: "Bạn cần 1 Rương và 1 Chìa khóa!", chestOpen: "Bạn đã mở rương:", chestEmpty: "Rương rỗng hoặc chỉ có bụi...",
+            skillName: "Nhất Kiếm Trảm Tà Ma ⚔️", skillCd: "ĐANG HỒI...", logHit: "Đánh: -", dropChest: "Rớt 1 RƯƠNG!", dropKey: "Rớt 1 CHÌA KHÓA!",
+            codeUsed: "Code đã dùng!", codeInvalid: "Code sai!", codeDemo: "Đã nhận quà DEMO!"
         },
         en: {
             play: "PLAY", save: "SAVE", load: "LOAD", selectClass: "CHOOSE CLASS",
@@ -251,27 +255,31 @@
             normalHit: "NORMAL ATTACK ⚡", bannerTitle: "UNIT BANNER",
             navLobby: "LOBBY", navAdventure: "BATTLE", navSummon: "SUMMON",
             saved: "Progress saved!", noSave: "No save file found!",
-            welcome: "Welcome back!", fail: "Defeated!", askName: "New name:",
-            rarityTitle: "RARITY & RATES", sell: "Sell"
+            welcome: "Welcome back!", fail: "Defeated!", askName: "Enter new name:",
+            rarityTitle: "RARITY & RATES", sell: "Sell",
+            chestLabel: "CHEST", keyLabel: "KEY", openBtn: "OPEN CHEST", codeEnter: "USE", codePh: "ENTER CODE...",
+            chestReq: "Need 1 Chest & 1 Key!", chestOpen: "You opened a chest:", chestEmpty: "Empty chest...",
+            skillName: "First Sword Slayer ⚔️", skillCd: "COOLDOWN...", logHit: "Hit: -", dropChest: "Found 1 CHEST!", dropKey: "Found 1 KEY!",
+            codeUsed: "Already used!", codeInvalid: "Invalid code!", codeDemo: "DEMO Reward claimed!"
         }
     };
 
     const rates = [
-        { name: "God Relic", rate: 0.02, class: "god-relic", icon: "👑", price: 5000, atk: 2000, hp: 10000, units: ["Idoku (Vua Các Vị Thần)", "Shikami (Ác Thần)"] },
-        { name: "Ultra Relic", rate: 0.5, class: "ultra-relic", icon: "💎", price: 2000, atk: 1000, hp: 5000, units: ["Thần Vô Cực - Creation", "Noir (God Form)"] },
-        { name: "Ultra Rainbow", rate: 1.5, class: "ultra-rainbow", icon: "🌌", price: 1000, atk: 600, hp: 3000, units: ["Hào Quang Vô Tận", "Sức Mạnh Sáng Tạo"] },
-        { name: "Rainbow", rate: 4.0, class: "rainbow", icon: "🌈", price: 500, atk: 350, hp: 1500, units: ["Idoku (Chiến Binh)", "Linh Hồn Đa Sắc"] },
-        { name: "Heroic", rate: 8.0, class: "heroic", icon: "🔥", price: 300, atk: 200, hp: 800, units: ["Anh Hùng Mạnh Nhất", "Kỵ Sĩ Viễn Chinh"] },
-        { name: "Legendary", rate: 15.0, class: "legendary", icon: "🌟", price: 200, atk: 120, hp: 500, units: ["Hiệu Trưởng Kyou", "Pháp Sư Tối Cao"] },
-        { name: "Epic", rate: 25.0, class: "epic", icon: "🟣", price: 100, atk: 70, hp: 250, units: ["Đội Trưởng Hoàng Gia", "Pháp Sư Bậc Thầy"] },
-        { name: "Rare", rate: 40.0, class: "rare", icon: "🔵", price: 50, atk: 40, hp: 120, units: ["Mạo Hiểm Giả Hạng A", "Cung Thủ Tinh Nhuệ"] },
-        { name: "Uncommon", rate: 50.0, class: "uncommon", icon: "🟢", price: 20, atk: 20, hp: 60, units: ["Mạo Hiểm Giả Hạng C", "Lính Gác Thành"] },
-        { name: "Common", rate: 100.0, class: "common", icon: "⚪", price: 5, atk: 8, hp: 30, units: ["Slime Thuần Hóa", "Dân Làng"] }
+        { name: "God Relic", rate: 0.02, class: "god-relic", icon: "👑", price: 5000, atk: 2000, hp: 10000, units: ["Idoku (God)", "Shikami (Evil God)"] },
+        { name: "Ultra Relic", rate: 0.5, class: "ultra-relic", icon: "💎", price: 2000, atk: 1000, hp: 5000, units: ["God Infinity - Creation", "Noir (God Form)"] },
+        { name: "Ultra Rainbow", rate: 1.5, class: "ultra-rainbow", icon: "🌌", price: 1000, atk: 600, hp: 3000, units: ["Infinite Aura", "Creation Power"] },
+        { name: "Rainbow", rate: 4.0, class: "rainbow", icon: "🌈", price: 500, atk: 350, hp: 1500, units: ["Idoku (Warrior)", "Prism Soul"] },
+        { name: "Heroic", rate: 8.0, class: "heroic", icon: "🔥", price: 300, atk: 200, hp: 800, units: ["Strongest Hero", "Crusade Knight"] },
+        { name: "Legendary", rate: 15.0, class: "legendary", icon: "🌟", price: 200, atk: 120, hp: 500, units: ["Principal Kyou", "High Mage"] },
+        { name: "Epic", rate: 25.0, class: "epic", icon: "🟣", price: 100, atk: 70, hp: 250, units: ["Royal Captain", "Master Mage"] },
+        { name: "Rare", rate: 40.0, class: "rare", icon: "🔵", price: 50, atk: 40, hp: 120, units: ["Rank A Adventurer", "Elite Archer"] },
+        { name: "Uncommon", rate: 50.0, class: "uncommon", icon: "🟢", price: 20, atk: 20, hp: 60, units: ["Rank C Adventurer", "Guard"] },
+        { name: "Common", rate: 100.0, class: "common", icon: "⚪", price: 5, atk: 8, hp: 30, units: ["Tamed Slime", "Villager"] }
     ];
 
     const pityPool = [
-        { name: "Idoku (Vua Các Vị Thần)", icon: "👑", class: "god-relic", atk: 2500, hp: 12000, price: 5000 },
-        { name: "Shikami (Ác Thần)", icon: "👑", class: "god-relic", atk: 2500, hp: 12000, price: 5000 }
+        { name: "Idoku (God)", icon: "👑", class: "god-relic", atk: 2500, hp: 12000, price: 5000 },
+        { name: "Shikami (Evil God)", icon: "👑", class: "god-relic", atk: 2500, hp: 12000, price: 5000 }
     ];
 
     const slimeTypes = [
@@ -336,6 +344,7 @@
             const key = el.getAttribute('data-t');
             if (t[key]) el.innerText = t[key];
         });
+        document.getElementById('giftcode-input').placeholder = t.codePh;
         updateUI();
         if(document.getElementById('p-summon').classList.contains('active-flex')) renderRarityTable();
     }
@@ -423,20 +432,20 @@
         const skillBtn = document.getElementById('main-skill-btn');
         if(skillBtn) {
             skillBtn.disabled = (isCC || skillCooldown > 0);
-            if (skillCooldown <= 0) skillBtn.innerText = "Nhất Kiếm Trảm Tà Ma ⚔️ (50 DMG)";
+            if (skillCooldown <= 0) skillBtn.innerText = lang[currentLang].skillName + " (50 DMG)";
         }
         document.getElementById('skill-box').style.display = (player.class === "Kiếm Sĩ") ? "block" : "none";
     }
 
     function openChest() {
-        if(wallet.chest <= 0 || wallet.key <= 0) return alert("Bạn cần 1 Rương và 1 Chìa khóa!");
+        if(wallet.chest <= 0 || wallet.key <= 0) return alert(lang[currentLang].chestReq);
         wallet.chest--; wallet.key--;
         let r = Math.random() * 100;
-        let msg = "Bạn đã mở rương: \n";
+        let msg = lang[currentLang].chestOpen + " \n";
         if (r < 10) { let rbAmt = Math.floor(Math.random() * 15) + 5; wallet.rb += rbAmt; msg += `+ ${rbAmt} RBC!`; }
         else if (r < 11) { wallet.god += 1; msg += `+ 1 GOD COIN! (Cực hiếm)`; }
         else if (r < 40) { let goldAmt = Math.floor(Math.random() * 15001) + 5000; wallet.gold += goldAmt; msg += `+ ${goldAmt} Gold!`; }
-        else { msg += "Rương rỗng hoặc chỉ có bụi..."; }
+        else { msg += lang[currentLang].chestEmpty; }
         alert(msg);
         updateUI();
     }
@@ -444,13 +453,13 @@
     function useCode() {
         let code = document.getElementById('giftcode-input').value.trim().toUpperCase();
         if(code === "") return;
-        if(usedCodes.includes(code)) { alert("Code này đã được sử dụng!"); return; }
+        if(usedCodes.includes(code)) { alert(lang[currentLang].codeUsed); return; }
         if(code === "DEMO") {
-            wallet.rb += 500; wallet.gold += 1000000; wallet.chest += 5; wallet.key += 5;
+            wallet.rb += 500; wallet.gold += 2000000; wallet.chest += 5; wallet.key += 5;
             usedCodes.push(code);
-            alert("Kích hoạt bản DEMO thành công: +500 RBC, +1M Gold, +5 Rương/Chìa!");
+            alert(lang[currentLang].codeDemo + " (+500 RBC, +2M Gold, +5 Chest/Key)");
         } else {
-            alert("Code không hợp lệ!");
+            alert(lang[currentLang].codeInvalid);
         }
         document.getElementById('giftcode-input').value = "";
         updateUI();
@@ -461,12 +470,12 @@
         let bAtk = player.equippedIdx !== null ? inventory[player.equippedIdx].atk : 0;
         let dmg = (player.class === "Kiếm Sĩ") ? 50 + bAtk : player.baseAtk + bAtk; 
         mob.hp -= dmg;
-        document.getElementById('battle-log').innerText = "Hit: -" + dmg;
+        document.getElementById('battle-log').innerText = lang[currentLang].logHit + dmg;
         if (mob.hp <= 0) { 
             mob.count++; 
             gainXP(40); 
-            if(Math.random() < 0.25) { wallet.chest++; document.getElementById('battle-log').innerText = "Rớt 1 RƯƠNG!"; }
-            if(Math.random() < 0.25) { wallet.key++; document.getElementById('battle-log').innerText = "Rớt 1 CHÌA KHÓA!"; }
+            if(Math.random() < 0.25) { wallet.chest++; document.getElementById('battle-log').innerText = lang[currentLang].dropChest; }
+            if(Math.random() < 0.25) { wallet.key++; document.getElementById('battle-log').innerText = lang[currentLang].dropKey; }
             spawnNewMob(); 
         }
         updateUI();
@@ -488,10 +497,10 @@
             skillCooldown--;
             if (skillCooldown <= 0) {
                 clearInterval(countdown);
-                btn.innerText = "Nhất Kiếm Trảm Tà Ma ⚔️ (50 DMG)";
+                btn.innerText = lang[currentLang].skillName + " (50 DMG)";
                 btn.disabled = (player.stunTicks > 0 || player.freezeTicks > 0);
             } else {
-                btn.innerText = `ĐANG HỒI... (${skillCooldown}s)`;
+                btn.innerText = `${lang[currentLang].skillCd} (${skillCooldown}s)`;
             }
         }, 1000);
         if (mob.hp <= 0) { 
@@ -536,8 +545,8 @@
             if(wallet.rb < cost) return alert("Không đủ RBC!");
             wallet.rb -= cost;
         } else if(currency === 'gold') {
-            if(wallet.gold < 200000) return alert("Không đủ GOLD! (Cần 200,000)");
-            wallet.gold -= 200000;
+            if(wallet.gold < 2000000) return alert("Không đủ GOLD! (Cần 2,000,000 cho x10)");
+            wallet.gold -= 2000000;
         } else if(currency === 'god') {
             if(wallet.god < 1) return alert("Không đủ GOD COIN!");
             wallet.god -= 1;
@@ -574,7 +583,6 @@
             lastLimit = r.rate;
         });
     }
-    document.getElementById('display-name').innerText = playerName;
     updateUI();
 </script>
 </body>
