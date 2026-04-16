@@ -46,11 +46,16 @@
         .stat-item { background: #1a1a1a; padding: 8px; border-radius: 12px; border-left: 3px solid var(--cyan); text-align: left; }
         .stat-label { font-size: 8px; color: #666; text-transform: uppercase; }
         .stat-val { font-size: 12px; font-weight: 900; color: #fff; }
-        .extra-inv { width: 100%; margin-top: 10px; display: flex; justify-content: center; gap: 15px; background: #1a1a1a; padding: 10px; border-radius: 12px; box-sizing: border-box; border: 1px dashed #333; }
+        
+        /* Cập nhật khu vực rương */
+        .extra-inv { width: 100%; margin-top: 10px; display: flex; flex-direction: column; gap: 5px; background: #1a1a1a; padding: 10px; border-radius: 12px; box-sizing: border-box; border: 1px dashed #333; }
+        .chest-info { display: flex; justify-content: space-around; width: 100%; margin-bottom: 5px; }
+        .chest-btns { display: flex; gap: 5px; justify-content: center; width: 100%; }
         .extra-slot { text-align: center; }
-        .extra-slot span { font-size: 20px; display: block; }
+        .extra-slot span { font-size: 16px; display: block; }
         .extra-slot b { font-size: 10px; color: var(--cyan); }
-        .open-chest-btn { margin-top: 5px; padding: 4px 8px; font-size: 8px; background: var(--gold); border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #000; }
+        .open-chest-btn { padding: 4px 6px; font-size: 8px; background: var(--gold); border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #000; flex: 1; }
+
         .code-input-group { margin-top: 15px; display: flex; gap: 5px; width: 100%; }
         .code-field { flex: 1; background: #222; border: 1px solid #333; border-radius: 8px; color: var(--cyan); padding: 8px; font-size: 10px; outline: none; }
         .code-btn { background: var(--cyan); border: none; border-radius: 8px; padding: 0 15px; font-weight: bold; font-size: 10px; cursor: pointer; color: #000; }
@@ -60,6 +65,14 @@
         .inv-item.equipped { border: 2px solid var(--cyan); box-shadow: 0 0 10px var(--cyan); transform: scale(1.05); }
         .inv-item .sell-btn { background: #ff4d4d; border: none; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-top: 5px; cursor: pointer; width: 100%; }
         .inv-item-name { font-size: 9px; font-weight: bold; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        /* Modal Đăng Nhập */
+        #login-modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .login-card { background: #1a1a1a; padding: 20px; border-radius: 20px; border: 2px solid var(--cyan); width: 80%; }
+        .login-day-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin: 15px 0; }
+        .day-box { background: #333; font-size: 8px; padding: 5px; border-radius: 5px; opacity: 0.5; }
+        .day-box.active { opacity: 1; border: 1px solid var(--gold); background: #444; }
+
         #p-adventure { justify-content: center; align-items: center; text-align: center; }
         .slime-container { margin-top: 20px; position: relative; width: 100%; }
         .slime { width: 140px; height: 140px; background: #32cd32; border-radius: 50% 50% 40% 40%; margin: 20px auto; cursor: pointer; border: 5px solid #228b22; display: flex; align-items: center; justify-content: center; font-size: 50px; transition: 0.1s; box-shadow: 0 8px 0 #228b22; position: relative; z-index: 10; }
@@ -108,6 +121,20 @@
 </head>
 <body>
 <div class="mobile-container" id="main-container">
+    <div id="login-modal">
+        <div class="login-card">
+            <h2 style="color:var(--gold)">DAILY LOGIN</h2>
+            <div id="login-msg" style="font-size: 12px; margin-bottom: 10px;">Ngày tiếp theo sẽ reset lúc 0:00 (GMT+7)</div>
+            <div class="login-day-grid" id="login-grid">
+                <div class="day-box" id="d1">N1: 20R</div><div class="day-box" id="d2">N2: 40R</div>
+                <div class="day-box" id="d3">N3: 60R</div><div class="day-box" id="d4">N4: 80R</div>
+                <div class="day-box" id="d5">N5: 100R+20kG</div><div class="day-box" id="d6">N6: 120R</div>
+                <div class="day-box" id="d7">N7: 5 God</div>
+            </div>
+            <button class="play-btn" style="font-size:16px; padding:10px 40px" onclick="claimLogin()">NHẬN THƯỞNG</button>
+        </div>
+    </div>
+
     <div id="p-menu" class="page active-flex">
         <div class="title">ADVENTURE ENDLESS DEMO</div>
         <div class="version">v0.2.1 beta</div>
@@ -150,10 +177,19 @@
                     <div class="name-display" id="display-name" onclick="changeName()">IDOKU</div>
                     <div style="font-size: 10px; color: var(--cyan); margin-bottom: 5px;">LV: <span id="v-lv">1</span></div>
                     <div class="xp-container"><div id="xp-bar"></div></div>
+                    
                     <div class="extra-inv">
-                        <div class="extra-slot"><span>📦</span><b><span data-t="chestLabel">RƯƠNG</span>: <span id="v-chest">0</span></b><br><button class="open-chest-btn" data-t="openBtn" onclick="openChest()">MỞ RƯƠNG</button></div>
-                        <div class="extra-slot"><span>🔑</span><b><span data-t="keyLabel">CHÌA</span>: <span id="v-key">0</span></b></div>
+                        <div class="chest-info">
+                            <div class="extra-slot"><span>📦</span><b><span data-t="chestLabel">RƯƠNG</span>: <span id="v-chest">0</span></b></div>
+                            <div class="extra-slot"><span>🔑</span><b><span data-t="keyLabel">CHÌA</span>: <span id="v-key">0</span></b></div>
+                        </div>
+                        <div class="chest-btns">
+                            <button class="open-chest-btn" onclick="openChest(1)">X1</button>
+                            <button class="open-chest-btn" onclick="openChest(10)">X10</button>
+                            <button class="open-chest-btn" onclick="openChest(100)">X100</button>
+                        </div>
                     </div>
+
                     <div class="code-input-group">
                         <input type="text" class="code-field" id="giftcode-input" placeholder="NHẬP GIFTCODE...">
                         <button class="code-btn" data-t="codeEnter" onclick="useCode()">NHẬP</button>
@@ -231,6 +267,9 @@
     let battleTimer = null;
     let currentLang = 'vi';
 
+    // Data mới: Đăng nhập
+    let loginData = { lastClaim: null, streak: 0 };
+
     const lang = {
         vi: {
             play: "PLAY", save: "SAVE", load: "LOAD", selectClass: "CHỌN CLASS",
@@ -243,7 +282,7 @@
             welcome: "Chào mừng trở lại!", fail: "Thất bại!", askName: "Nhập tên mới:",
             rarityTitle: "PHÂN CẤP & TỈ LỆ", sell: "Bán",
             chestLabel: "RƯƠNG", keyLabel: "CHÌA", openBtn: "MỞ RƯƠNG", codeEnter: "NHẬP", codePh: "NHẬP GIFTCODE...",
-            chestReq: "Bạn cần 1 Rương và 1 Chìa khóa!", chestOpen: "Bạn đã mở rương:", chestEmpty: "Rương rỗng hoặc chỉ có bụi...",
+            chestReq: "Không đủ Rương hoặc Chìa!", chestOpen: "Bạn đã mở rương:", chestEmpty: "Rương rỗng...",
             skillName: "Nhất Kiếm Trảm Tà Ma ⚔️", skillCd: "ĐANG HỒI...", logHit: "Đánh: -", dropChest: "Rớt 1 RƯƠNG!", dropKey: "Rớt 1 CHÌA KHÓA!",
             codeUsed: "Code đã dùng!", codeInvalid: "Code sai!", codeDemo: "Đã nhận quà DEMO!"
         },
@@ -258,7 +297,7 @@
             welcome: "Welcome back!", fail: "Defeated!", askName: "Enter new name:",
             rarityTitle: "RARITY & RATES", sell: "Sell",
             chestLabel: "CHEST", keyLabel: "KEY", openBtn: "OPEN CHEST", codeEnter: "USE", codePh: "ENTER CODE...",
-            chestReq: "Need 1 Chest & 1 Key!", chestOpen: "You opened a chest:", chestEmpty: "Empty chest...",
+            chestReq: "Not enough Chests or Keys!", chestOpen: "You opened:", chestEmpty: "Empty...",
             skillName: "First Sword Slayer ⚔️", skillCd: "COOLDOWN...", logHit: "Hit: -", dropChest: "Found 1 CHEST!", dropKey: "Found 1 KEY!",
             codeUsed: "Already used!", codeInvalid: "Invalid code!", codeDemo: "DEMO Reward claimed!"
         }
@@ -291,6 +330,52 @@
         { name: "KING SLIME (BOSS)", icon: "👑", hp: 1500, dmg: 50, debuff: "boss_rage" }
     ];
 
+    // --- Tính năng Đăng nhập qua ngày (Reset 0:00 VN) ---
+    function checkDailyLogin() {
+        const now = new Date();
+        // Chuyển sang giờ VN (GMT+7)
+        const vnTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+        const todayStr = vnTime.toISOString().split('T')[0];
+
+        if (loginData.lastClaim !== todayStr) {
+            // Nếu bỏ lỡ ngày, reset streak hoặc tính tiếp tùy logic, ở đây là tính tiếp 7 ngày
+            if (loginData.streak >= 7) loginData.streak = 0;
+            showLoginModal();
+        }
+    }
+
+    function showLoginModal() {
+        document.getElementById('login-modal').style.display = 'flex';
+        const streak = loginData.streak + 1;
+        document.querySelectorAll('.day-box').forEach((box, idx) => {
+            box.classList.remove('active');
+            if (idx + 1 === streak) box.classList.add('active');
+        });
+    }
+
+    function claimLogin() {
+        loginData.streak++;
+        const s = loginData.streak;
+        let giftMsg = "";
+
+        if (s === 1) { wallet.rb += 20; giftMsg = "20 RBC"; }
+        else if (s === 2) { wallet.rb += 40; giftMsg = "40 RBC"; }
+        else if (s === 3) { wallet.rb += 60; giftMsg = "60 RBC"; }
+        else if (s === 4) { wallet.rb += 80; giftMsg = "80 RBC"; }
+        else if (s === 5) { wallet.rb += 100; wallet.gold += 20000; giftMsg = "100 RBC + 20,000 Gold"; }
+        else if (s === 6) { wallet.rb += 120; giftMsg = "120 RBC"; }
+        else if (s === 7) { wallet.god += 5; giftMsg = "5 GOD COIN"; }
+
+        const now = new Date();
+        const vnTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+        loginData.lastClaim = vnTime.toISOString().split('T')[0];
+
+        alert("Bạn đã nhận thưởng ngày " + s + ": " + giftMsg);
+        document.getElementById('login-modal').style.display = 'none';
+        updateUI();
+        saveGame();
+    }
+
     function setAvatar(e) {
         const file = e.target.files[0];
         if (file) {
@@ -313,13 +398,13 @@
     }
 
     function saveGame() {
-        const gameData = { wallet, player, inventory, pity, mobCount: mob.count, playerName, customAvatar, usedCodes };
-        localStorage.setItem('adv_endless_v2_2', JSON.stringify(gameData));
-        alert(lang[currentLang].saved);
+        const gameData = { wallet, player, inventory, pity, mobCount: mob.count, playerName, customAvatar, usedCodes, loginData };
+        localStorage.setItem('adv_endless_v2_3', JSON.stringify(gameData));
+        if(arguments.length === 0) alert(lang[currentLang].saved);
     }
 
     function loadGame() {
-        const data = localStorage.getItem('adv_endless_v2_2');
+        const data = localStorage.getItem('adv_endless_v2_3');
         if(!data) return alert(lang[currentLang].noSave);
         const parsed = JSON.parse(data);
         wallet = parsed.wallet;
@@ -330,11 +415,13 @@
         mob.count = parsed.mobCount || 0;
         playerName = parsed.playerName || playerName;
         customAvatar = parsed.customAvatar || null;
+        loginData = parsed.loginData || { lastClaim: null, streak: 0 };
         document.getElementById('display-name').innerText = playerName; 
         document.getElementById('display-class').innerText = player.class;
         renderAvatar();
         goTo('lobby');
         alert(lang[currentLang].welcome);
+        checkDailyLogin();
     }
 
     function toggleLang() {
@@ -437,16 +524,29 @@
         document.getElementById('skill-box').style.display = (player.class === "Kiếm Sĩ") ? "block" : "none";
     }
 
-    function openChest() {
-        if(wallet.chest <= 0 || wallet.key <= 0) return alert(lang[currentLang].chestReq);
-        wallet.chest--; wallet.key--;
-        let r = Math.random() * 100;
-        let msg = lang[currentLang].chestOpen + " \n";
-        if (r < 10) { let rbAmt = Math.floor(Math.random() * 15) + 5; wallet.rb += rbAmt; msg += `+ ${rbAmt} RBC!`; }
-        else if (r < 11) { wallet.god += 1; msg += `+ 1 GOD COIN! (Cực hiếm)`; }
-        else if (r < 40) { let goldAmt = Math.floor(Math.random() * 15001) + 5000; wallet.gold += goldAmt; msg += `+ ${goldAmt} Gold!`; }
-        else { msg += lang[currentLang].chestEmpty; }
-        alert(msg);
+    // --- Tính năng Mở Rương x1, x10, x100 ---
+    function openChest(times) {
+        if(wallet.chest < times || wallet.key < times) return alert(lang[currentLang].chestReq);
+        
+        let totalGold = 0;
+        let totalRb = 0;
+        let totalGod = 0;
+        let resultsCount = 0;
+
+        for(let i=0; i<times; i++) {
+            wallet.chest--; wallet.key--;
+            let r = Math.random() * 100;
+            if (r < 10) { totalRb += Math.floor(Math.random() * 15) + 5; }
+            else if (r < 11) { totalGod += 1; }
+            else if (r < 40) { totalGold += Math.floor(Math.random() * 15001) + 5000; }
+        }
+
+        wallet.rb += totalRb;
+        wallet.gold += totalGold;
+        wallet.god += totalGod;
+
+        let finalMsg = `BẠN ĐÃ MỞ ${times} RƯƠNG:\n- Gold: +${totalGold.toLocaleString()}\n- RBC: +${totalRb}\n- God Coin: +${totalGod}`;
+        alert(finalMsg);
         updateUI();
     }
 
@@ -583,7 +683,12 @@
             lastLimit = r.rate;
         });
     }
-    updateUI();
+    
+    // Khởi tạo ban đầu
+    window.onload = () => {
+        updateUI();
+        checkDailyLogin();
+    };
 </script>
 </body>
 </html>
