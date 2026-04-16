@@ -51,6 +51,9 @@
         .extra-slot span { font-size: 20px; display: block; }
         .extra-slot b { font-size: 10px; color: var(--cyan); }
         .open-chest-btn { margin-top: 5px; padding: 4px 8px; font-size: 8px; background: var(--gold); border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #000; }
+        .code-input-group { margin-top: 15px; display: flex; gap: 5px; width: 100%; }
+        .code-field { flex: 1; background: #222; border: 1px solid #333; border-radius: 8px; color: var(--cyan); padding: 8px; font-size: 10px; outline: none; }
+        .code-btn { background: var(--cyan); border: none; border-radius: 8px; padding: 0 15px; font-weight: bold; font-size: 10px; cursor: pointer; color: #000; }
         .inventory-box { width: 100%; margin-top: 20px; text-align: left; }
         .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; padding-bottom: 20px; }
         .inv-item { background: #1a1a1a; border-radius: 8px; padding: 8px; text-align: center; border: 1px solid #333; position: relative; cursor: pointer; }
@@ -107,7 +110,7 @@
 <div class="mobile-container" id="main-container">
     <div id="p-menu" class="page active-flex">
         <div class="title">ADVENTURE ENDLESS DEMO</div>
-        <div class="version">v0.2 beta</div>
+        <div class="version">v0.2.1 beta</div>
         <button class="play-btn" data-t="play" onclick="openClassSelect()">PLAY</button>
         <div class="save-load-group">
             <button class="menu-sub-btn" data-t="save" onclick="saveGame()">SAVE</button>
@@ -150,6 +153,10 @@
                     <div class="extra-inv">
                         <div class="extra-slot"><span>📦</span><b>RƯƠNG: <span id="v-chest">0</span></b><br><button class="open-chest-btn" onclick="openChest()">MỞ RƯƠNG</button></div>
                         <div class="extra-slot"><span>🔑</span><b>CHÌA: <span id="v-key">0</span></b></div>
+                    </div>
+                    <div class="code-input-group">
+                        <input type="text" class="code-field" id="giftcode-input" placeholder="NHẬP GIFTCODE...">
+                        <button class="code-btn" onclick="useCode()">NHẬP</button>
                     </div>
                     <div class="stats-container" style="margin-top:10px;">
                         <div class="stat-item"><div class="stat-label">ATK</div><div class="stat-val" id="st-atk">10</div></div>
@@ -215,6 +222,7 @@
     let customAvatar = null;
     let wallet = { gold: 0, rb: 0, god: 0, chest: 0, key: 0 }; 
     let player = { lv: 1, xp: 0, nextXp: 100, baseAtk: 10, baseDef: 10, baseHp: 100, curHp: 100, equippedIdx: null, class: "", burnTicks: 0, freezeTicks: 0, stunTicks: 0 };
+    let usedCodes = [];
     let debuffCooldown = 0;
     let skillCooldown = 0;
     let inventory = [];
@@ -297,7 +305,7 @@
     }
 
     function saveGame() {
-        const gameData = { wallet, player, inventory, pity, mobCount: mob.count, playerName, customAvatar };
+        const gameData = { wallet, player, inventory, pity, mobCount: mob.count, playerName, customAvatar, usedCodes };
         localStorage.setItem('adv_endless_v2_2', JSON.stringify(gameData));
         alert(lang[currentLang].saved);
     }
@@ -310,6 +318,7 @@
         player = parsed.player;
         inventory = parsed.inventory;
         pity = parsed.pity;
+        usedCodes = parsed.usedCodes || [];
         mob.count = parsed.mobCount || 0;
         playerName = parsed.playerName || playerName;
         customAvatar = parsed.customAvatar || null;
@@ -424,11 +433,26 @@
         wallet.chest--; wallet.key--;
         let r = Math.random() * 100;
         let msg = "Bạn đã mở rương: \n";
-        if (r < 6) { let rbAmt = Math.floor(Math.random() * 10) + 1; wallet.rb += rbAmt; msg += `+ ${rbAmt} RBC!`; }
-        else if (r < 7) { wallet.god += 1; msg += `+ 1 GOD COIN! (Cực hiếm)`; }
-        else if (r < 27) { let goldAmt = Math.floor(Math.random() * 8001) + 2000; wallet.gold += goldAmt; msg += `+ ${goldAmt} Gold!`; }
+        if (r < 10) { let rbAmt = Math.floor(Math.random() * 15) + 5; wallet.rb += rbAmt; msg += `+ ${rbAmt} RBC!`; }
+        else if (r < 11) { wallet.god += 1; msg += `+ 1 GOD COIN! (Cực hiếm)`; }
+        else if (r < 40) { let goldAmt = Math.floor(Math.random() * 15001) + 5000; wallet.gold += goldAmt; msg += `+ ${goldAmt} Gold!`; }
         else { msg += "Rương rỗng hoặc chỉ có bụi..."; }
         alert(msg);
+        updateUI();
+    }
+
+    function useCode() {
+        let code = document.getElementById('giftcode-input').value.trim().toUpperCase();
+        if(code === "") return;
+        if(usedCodes.includes(code)) { alert("Code này đã được sử dụng!"); return; }
+        if(code === "DEMO") {
+            wallet.rb += 500; wallet.gold += 1000000; wallet.chest += 5; wallet.key += 5;
+            usedCodes.push(code);
+            alert("Kích hoạt bản DEMO thành công: +500 RBC, +1M Gold, +5 Rương/Chìa!");
+        } else {
+            alert("Code không hợp lệ!");
+        }
+        document.getElementById('giftcode-input').value = "";
         updateUI();
     }
 
@@ -440,10 +464,9 @@
         document.getElementById('battle-log').innerText = "Hit: -" + dmg;
         if (mob.hp <= 0) { 
             mob.count++; 
-            wallet.rb += 3; 
             gainXP(40); 
-            if(Math.random() < 0.2) { wallet.chest++; document.getElementById('battle-log').innerText = "Rớt 1 RƯƠNG!"; }
-            if(Math.random() < 0.2) { wallet.key++; document.getElementById('battle-log').innerText = "Rớt 1 CHÌA KHÓA!"; }
+            if(Math.random() < 0.25) { wallet.chest++; document.getElementById('battle-log').innerText = "Rớt 1 RƯƠNG!"; }
+            if(Math.random() < 0.25) { wallet.key++; document.getElementById('battle-log').innerText = "Rớt 1 CHÌA KHÓA!"; }
             spawnNewMob(); 
         }
         updateUI();
@@ -472,9 +495,9 @@
             }
         }, 1000);
         if (mob.hp <= 0) { 
-            mob.count++; wallet.rb += 3; gainXP(40); 
-            if(Math.random() < 0.2) wallet.chest++;
-            if(Math.random() < 0.2) wallet.key++;
+            mob.count++; gainXP(40); 
+            if(Math.random() < 0.25) wallet.chest++;
+            if(Math.random() < 0.25) wallet.key++;
             spawnNewMob(); 
         }
         updateUI();
