@@ -1,731 +1,170 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adventure Endless - Custom Avatar & Name</title>
-    <style>
-        :root {
-            --god: linear-gradient(45deg, #ff0000, #ffff00);
-            --ur: #ff00ff; 
-            --urb: linear-gradient(45deg, #00dbde, #fc00ff);
-            --rb: linear-gradient(to right, #ff2400, #e8b71d, #1de840, #1ddde8, #1ddde8, #dd00f3);
-            --cyan: #00fbff; --gold: #ffd700;
-            --heroic: #ff4500; --legend: #ffd700; --epic: #a020f0; --rare: #1e90ff; --uncom: #32cd32; --com: #808080;
-        }
-        body { background: #000; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
-        .mobile-container { width: 360px; height: 760px; background: #121212; border: 4px solid #333; border-radius: 40px; position: relative; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-        .shake-active { animation: shakeEffect 0.2s; }
-        @keyframes shakeEffect { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-4px, -2px); } 100% { transform: translate(0, 0); } }
-        .page { display: none; width: 100%; height: 100%; flex-direction: column; position: absolute; top: 0; left: 0; }
-        .active-flex { display: flex !important; }
-        #p-menu { background: radial-gradient(circle, #1a1a1a 0%, #000 100%); justify-content: center; align-items: center; z-index: 100; }
-        .title { font-size: 32px; font-weight: 900; color: var(--cyan); text-shadow: 0 0 20px var(--cyan); margin-bottom: 5px; text-align: center; padding: 0 20px; }
-        .version { font-size: 14px; color: #666; margin-bottom: 20px; font-weight: bold; }
-        .play-btn { padding: 15px 80px; font-size: 28px; font-weight: 900; background: var(--cyan); border: none; border-radius: 50px; cursor: pointer; color: #000; box-shadow: 0 0 30px var(--cyan); margin-bottom: 10px; }
-        .save-load-group { display: flex; gap: 10px; margin-top: 20px; }
-        .menu-sub-btn { padding: 10px 20px; font-size: 14px; font-weight: bold; background: #222; border: 1px solid var(--cyan); border-radius: 10px; color: var(--cyan); cursor: pointer; }
-        #p-class-select { background: #0a0a0a; z-index: 90; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .class-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 300px; }
-        .class-card { background: #1a1a1a; border: 1px solid #333; padding: 15px 5px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; }
-        .class-card:active { transform: scale(0.95); border-color: var(--cyan); }
-        .class-card i { font-size: 20px; display: block; margin-bottom: 5px; }
-        .class-card span { font-weight: bold; font-size: 11px; text-transform: uppercase; color: #bbb; }
-        #ui-game { display: none; width: 100%; height: 100%; flex-direction: column; z-index: 10; }
-        .header-wallet { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; padding: 60px 10px 10px; background: #1a1a1a; }
-        .coin-slot { background: #000; padding: 5px; border-radius: 8px; font-size: 9px; border: 1px solid #333; text-align: center; font-weight: bold; }
-        .content-area { flex: 1; position: relative; overflow: hidden; background: #121212; }
-        .lobby-content { padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; overflow-y: auto; height: 100%; scrollbar-width: none; }
-        .avatar-box { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--cyan); margin-bottom: 10px; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; position: relative; }
-        .avatar-box img { width: 100%; height: 100%; object-fit: cover; }
-        .avatar-box .edit-tag { position: absolute; bottom: 0; background: rgba(0,0,0,0.6); width: 100%; font-size: 8px; color: var(--cyan); padding: 2px 0; }
-        .name-display { color: var(--cyan); font-size: 24px; font-weight: 900; margin-bottom: 5px; cursor: pointer; text-transform: uppercase; }
-        .xp-container { width: 100%; background: #222; height: 10px; border-radius: 5px; margin-bottom: 15px; overflow: hidden; border: 1px solid #333; }
-        #xp-bar { height: 100%; background: var(--cyan); width: 0%; transition: 0.3s; }
-        .stats-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
-        .stat-item { background: #1a1a1a; padding: 8px; border-radius: 12px; border-left: 3px solid var(--cyan); text-align: left; position: relative; }
-        .stat-label { font-size: 8px; color: #666; text-transform: uppercase; }
-        .stat-val { font-size: 12px; font-weight: 900; color: #fff; }
-        .add-btn { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; background: var(--cyan); color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; display: none; align-items: center; justify-content: center; }
-        .points-alert { background: #ff4500; color: #fff; font-size: 9px; padding: 2px 10px; border-radius: 10px; margin-bottom: 5px; display: none; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        .extra-inv { width: 100%; margin-top: 10px; display: flex; flex-direction: column; gap: 5px; background: #1a1a1a; padding: 10px; border-radius: 12px; box-sizing: border-box; border: 1px dashed #333; }
-        .chest-info { display: flex; justify-content: space-around; width: 100%; margin-bottom: 5px; }
-        .chest-btns { display: flex; gap: 5px; justify-content: center; width: 100%; }
-        .extra-slot { text-align: center; }
-        .extra-slot span { font-size: 16px; display: block; }
-        .extra-slot b { font-size: 10px; color: var(--cyan); }
-        .open-chest-btn { padding: 4px 6px; font-size: 8px; background: var(--gold); border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: #000; flex: 1; }
-        .code-input-group { margin-top: 15px; display: flex; gap: 5px; width: 100%; }
-        .code-field { flex: 1; background: #222; border: 1px solid #333; border-radius: 8px; color: var(--cyan); padding: 8px; font-size: 10px; outline: none; }
-        .code-btn { background: var(--cyan); border: none; border-radius: 8px; padding: 0 15px; font-weight: bold; font-size: 10px; cursor: pointer; color: #000; }
-        .inventory-box { width: 100%; margin-top: 20px; text-align: left; }
-        .inventory-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; padding-bottom: 20px; }
-        .inv-item { background: #1a1a1a; border-radius: 8px; padding: 8px; text-align: center; border: 1px solid #333; position: relative; cursor: pointer; }
-        .inv-item.equipped { border: 2px solid var(--cyan); box-shadow: 0 0 10px var(--cyan); transform: scale(1.05); }
-        .inv-item .sell-btn { background: #ff4d4d; border: none; color: white; font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-top: 5px; cursor: pointer; width: 100%; }
-        .inv-item-name { font-size: 9px; font-weight: bold; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        #login-modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .login-card { background: #1a1a1a; padding: 20px; border-radius: 20px; border: 2px solid var(--cyan); width: 80%; }
-        .login-day-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin: 15px 0; }
-        .day-box { background: #333; font-size: 8px; padding: 5px; border-radius: 5px; opacity: 0.5; }
-        .day-box.active { opacity: 1; border: 1px solid var(--gold); background: #444; }
-        #p-adventure { justify-content: center; align-items: center; text-align: center; }
-        .slime-container { margin-top: 20px; position: relative; width: 100%; }
-        .slime { width: 140px; height: 140px; background: #32cd32; border-radius: 50% 50% 40% 40%; margin: 20px auto; cursor: pointer; border: 5px solid #228b22; display: flex; align-items: center; justify-content: center; font-size: 50px; transition: 0.1s; box-shadow: 0 8px 0 #228b22; position: relative; z-index: 10; }
-        .slime:active { transform: translateY(4px); box-shadow: 0 4px 0 #228b22; }
-        .hp-bar { width: 220px; height: 18px; background: #333; border: 2px solid #444; border-radius: 10px; margin: 10px auto; overflow: hidden; position: relative; }
-        .hp-fill { height: 100%; background: #ff4d4d; width: 100%; transition: width 0.1s; }
-        .hp-text { position: absolute; width: 100%; text-align: center; font-size: 10px; font-weight: bold; line-height: 18px; color: white; text-shadow: 1px 1px 2px black; z-index: 5; }
-        .sword-effect { position: absolute; width: 200%; height: 20px; background: linear-gradient(90deg, transparent, #00fbff, #fff, #00fbff, transparent); box-shadow: 0 0 20px #00fbff; top: 50%; left: -200%; transform: translateY(-50%) rotate(-5deg); z-index: 20; pointer-events: none; opacity: 0; }
-        .slash-anim { animation: slashAction 0.4s ease-out forwards; }
-        @keyframes slashAction { 0% { left: -200%; opacity: 1; } 100% { left: 200%; opacity: 0; } }
-        .skill-btn { margin-top: 15px; padding: 12px 25px; background: #1a1a1a; color: var(--cyan); border: 2px solid var(--cyan); border-radius: 12px; font-size: 13px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 80%; display: block; margin-left: auto; margin-right: auto; }
-        .skill-btn:disabled { border-color: #444; color: #444; cursor: not-allowed; }
-        .normal-hit-btn { margin-top: 10px; padding: 10px 20px; background: #333; color: #fff; border: 1px solid #555; border-radius: 10px; font-size: 12px; cursor: pointer; width: 60%; display: block; margin-left: auto; margin-right: auto; }
-        .normal-hit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .info-bar { padding: 8px; background: #1a1a1a; border-bottom: 1px solid #222; text-align: center; }
-        .pity-counter { font-size: 20px; font-weight: 900; color: #ffd700; }
-        .main-content { flex: 1; overflow-y: auto; padding: 10px; }
-        .rarity-table { background: #1a1a1a; border-radius: 12px; padding: 8px; margin-bottom: 12px; border: 1px solid #333; font-size: 8px; }
-        .rarity-row { display: flex; justify-content: space-between; padding: 2px 4px; border-bottom: 1px solid #222; }
-        .banner-card { background: #1e1e1e; border-radius: 15px; padding: 12px; margin-bottom: 12px; text-align: center; }
-        .btn-group { display: flex; flex-direction: column; gap: 8px; align-items: center; margin-top: 8px; }
-        .summon { width: 90%; padding: 10px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-size: 11px; }
-        .result-tray { height: 150px; background: #0a0a0a; border-top: 2px solid #222; display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; padding: 8px; overflow-y: auto; }
-        .nav-bar { height: 70px; background: #1a1a1a; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #333; border-radius: 0 0 40px 40px; }
-        .nav-btn { color: #444; font-weight: 900; font-size: 12px; cursor: pointer; }
-        .nav-active { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
-        .item { height: 55px; border-radius: 6px; font-size: 6px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: white; }
-        .god-relic { background: var(--god); color: #000; }
-        .ultra-relic { background: var(--ur); }
-        .ultra-rainbow { background: var(--urb); }
-        .rainbow { background: var(--rb); }
-        .heroic { background: var(--heroic); }
-        .legendary { background: var(--legend); color: #000; }
-        .epic { background: var(--epic); }
-        .rare { background: var(--rare); }
-        .uncommon { background: var(--uncom); }
-        .common { background: #333; color: #777; }
-        .burn-effect { box-shadow: 0 0 15px #ff4500 inset !important; animation: burnPulse 0.5s infinite; }
-        .freeze-effect { filter: hue-rotate(180deg) brightness(1.2); pointer-events: none; opacity: 0.8; }
-        .stun-effect { animation: stunPulse 0.2s infinite; }
-        @keyframes burnPulse { 50% { opacity: 0.6; } }
-        @keyframes stunPulse { 0% { transform: translate(1px); } 100% { transform: translate(-1px); } }
-        .back-btn { position: absolute; top: 25px; right: 15px; background: #333; color: #fff; border: 1px solid #444; padding: 5px 10px; border-radius: 8px; font-size: 10px; cursor: pointer; z-index: 101; }
-        .lang-btn { position: absolute; top: 25px; left: 15px; background: #333; color: #fff; border: 1px solid #444; padding: 5px 10px; border-radius: 8px; font-size: 10px; cursor: pointer; z-index: 101; }
-    </style>
-</head>
-<body>
-<div class="mobile-container" id="main-container">
-    <div id="login-modal">
-        <div class="login-card">
-            <h2 style="color:var(--gold)">DAILY LOGIN</h2>
-            <div id="login-msg" style="font-size: 12px; margin-bottom: 10px;">Ngày tiếp theo sẽ reset lúc 0:00 (GMT+7)</div>
-            <div class="login-day-grid" id="login-grid">
-                <div class="day-box" id="d1">N1: 20R</div><div class="day-box" id="d2">N2: 40R</div>
-                <div class="day-box" id="d3">N3: 60R</div><div class="day-box" id="d4">N4: 80R</div>
-                <div class="day-box" id="d5">N5: 100R+20kG</div><div class="day-box" id="d6">N6: 120R</div>
-                <div class="day-box" id="d7">N7: 5 God</div>
-            </div>
-            <button class="play-btn" style="font-size:16px; padding:10px 40px" onclick="claimLogin()">NHẬN THƯỞNG</button>
-        </div>
-    </div>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Adventure Endless</title>
+<style>
+:root{--god:linear-gradient(45deg,#ff0000,#ffff00);--ur:#ff00ff;--urb:linear-gradient(45deg,#00dbde,#fc00ff);--rb:linear-gradient(to right,#ff2400,#e8b71d,#1de840,#1ddde8,#1ddde8,#dd00f3);--cyan:#00fbff;--gold:#ffd700;--heroic:#ff4500;--legend:#ffd700;--epic:#a020f0;--rare:#1e90ff;--uncom:#32cd32;--com:#808080}
+*{-webkit-tap-highlight-color:transparent;outline:0;box-sizing:border-box} body{margin:0;padding:0;background:#000;color:#fff;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;width:100vw;overflow:hidden;user-select:none;-webkit-user-select:none}
+.mobile-container{width:100vw;height:100vh;max-width:600px;background:#121212;position:relative;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 50px rgba(0,0,0,.5)}
+@media(orientation:landscape){.mobile-container{overflow-y:auto}.enemy-zone{min-height:45vh}}
+.page{display:none;width:100%;height:100%;flex-direction:column;position:absolute;top:0;left:0;background:#121212;opacity:0} .active-flex{display:flex!important;animation:pageFade .3s ease forwards}
+@keyframes pageFade{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
+#p-menu{background:radial-gradient(circle,#1a1a1a 0,#000 100%);justify-content:center;align-items:center;z-index:100} .title{font-size:36px;font-weight:900;color:var(--cyan);text-shadow:0 0 20px var(--cyan);margin-bottom:5px;text-align:center;padding:0 20px} .version{font-size:14px;color:#666;margin-bottom:5px;font-weight:700}.credit{font-size:12px;color:var(--gold);margin-bottom:25px;font-style:italic}
+.play-btn{padding:15px 80px;font-size:28px;font-weight:900;background:var(--cyan);border:none;border-radius:50px;cursor:pointer;color:#000;box-shadow:0 0 30px var(--cyan);margin-bottom:10px;transition:.2s} .play-btn:active{transform:scale(.95)}.save-load-group{display:flex;flex-direction:column;gap:8px;margin-top:10px;width:90%;overflow-y:auto;max-height:250px}
+.slot-row{display:flex;gap:5px;justify-content:space-between;align-items:center;background:#222;padding:10px;border-radius:10px;border:1px solid #333} .slot-name{font-size:12px;color:#aaa;flex:1;text-align:left}.slot-btn{padding:5px 12px;font-size:11px;font-weight:700;background:#333;border:1px solid var(--cyan);border-radius:5px;color:var(--cyan);cursor:pointer} .slot-btn:hover{background:var(--cyan);color:#000}.del-btn{background:#550000;border-color:#ff4d4d;color:#fff}.del-btn:hover{background:#ff4d4d}
+#p-class-select{background:#0a0a0a;z-index:90;justify-content:center;align-items:center;padding:20px}.class-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;width:100%;max-width:400px;margin:0 auto} .class-card{background:#1a1a1a;border:1px solid #333;padding:20px 10px;border-radius:12px;text-align:center;cursor:pointer;transition:.2s} .class-card:active{transform:scale(.95);border-color:var(--cyan)}.class-card i{font-size:30px;display:block;margin-bottom:10px}.class-card span{font-weight:700;font-size:14px;text-transform:uppercase;color:#bbb}
+#ui-game{display:none;width:100%;height:100%;flex-direction:column;z-index:10}.header-wallet{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:60px 15px 10px;background:#1a1a1a;flex-shrink:0} .coin-slot{background:#000;padding:8px;border-radius:8px;font-size:11px;border:1px solid #333;text-align:center;font-weight:700}.content-area{flex:1;position:relative;overflow:hidden;background:#121212;display:flex;flex-direction:column}
+.lobby-content{padding:20px 20px 80px;text-align:center;display:flex;flex-direction:column;align-items:center;overflow-y:auto;height:100%;scrollbar-width:none} .avatar-box{width:100px;height:100px;border-radius:50%;border:3px solid var(--cyan);margin-bottom:10px;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;position:relative} .avatar-box img{width:100%;height:100%;object-fit:cover}.avatar-box .edit-tag{position:absolute;bottom:0;background:rgba(0,0,0,.6);width:100%;font-size:10px;color:var(--cyan);padding:4px 0}
+.name-display{color:var(--cyan);font-size:26px;font-weight:900;margin-bottom:10px;cursor:pointer;text-transform:uppercase}.xp-container{width:100%;background:#222;height:18px;border-radius:9px;margin-bottom:15px;overflow:hidden;border:1px solid #333;position:relative} #xp-bar{height:100%;background:var(--cyan);width:0;transition:.3s;box-shadow:0 0 10px var(--cyan)}.xp-text-overlay{position:absolute;width:100%;top:0;left:0;font-size:11px;font-weight:700;line-height:18px;color:#fff;text-shadow:1px 1px 2px #000;text-align:center;pointer-events:none}
+.equip-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;margin-bottom:15px}.equip-slot{background:#1a1a1a;border:1px dashed #444;border-radius:8px;padding:10px 5px;font-size:11px;cursor:pointer;min-height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative} .equip-slot.active{border:1px solid var(--cyan);box-shadow:0 0 8px var(--cyan);background:#112}.equip-slot b{font-size:9px;color:#888;display:block;margin-bottom:4px}.equip-slot span{font-weight:700;color:#fff;text-align:center;word-break:break-word}
+.stats-container{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}.stat-item{background:#1a1a1a;padding:12px;border-radius:12px;border-left:4px solid var(--cyan);text-align:left;position:relative} .stat-item.mag{border-left:4px solid #c0f}.stat-label{font-size:10px;color:#888;text-transform:uppercase;margin-bottom:4px}.stat-val{font-size:14px;font-weight:900;color:#fff}
+.add-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:25px;height:25px;background:var(--cyan);color:#000;border:none;border-radius:5px;font-weight:700;font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center} .stat-item.mag .add-btn{background:#c0f;color:#fff}.points-alert{background:#ff4500;color:#fff;font-size:11px;padding:4px 15px;border-radius:10px;margin-bottom:10px;display:none;animation:pulse 1s infinite;font-weight:700}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}.extra-inv{width:100%;margin-top:10px;display:flex;flex-direction:column;gap:10px;background:#1a1a1a;padding:15px;border-radius:12px;border:1px dashed #333} .chest-info{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;width:100%;margin-bottom:10px}.chest-btns{display:flex;gap:8px;justify-content:center;width:100%} .extra-slot{text-align:center;cursor:pointer;background:#222;padding:5px;border-radius:8px}.extra-slot span{font-size:20px;display:block;margin-bottom:5px}.extra-slot b{font-size:10px;color:var(--cyan)}
+.open-chest-btn{padding:8px;font-size:11px;background:var(--gold);border:none;border-radius:6px;cursor:pointer;font-weight:700;color:#000;flex:1}.code-input-group{margin-top:20px;display:flex;gap:8px;width:100%} .code-field{flex:1;background:#222;border:1px solid #333;border-radius:8px;color:var(--cyan);padding:12px;font-size:12px;outline:0;font-weight:700;text-align:center}.code-btn{background:var(--cyan);border:none;border-radius:8px;padding:0 20px;font-weight:700;font-size:12px;cursor:pointer;color:#000}
+.inv-tabs{display:flex;gap:5px;justify-content:center;width:100%;margin-bottom:15px}.inv-tab{flex:1;padding:8px 5px;font-size:10px;font-weight:700;background:#222;border:1px solid #444;border-radius:5px;color:#888;cursor:pointer;text-align:center} .inv-tab.active{background:var(--cyan);color:#000;border-color:var(--cyan)}.inventory-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;padding-bottom:20px;width:100%}
+.inv-item{background:#1a1a1a;border-radius:10px;padding:10px;text-align:center;border:1px solid #333;position:relative;cursor:pointer;transition:.2s;touch-action:manipulation} .inv-item.equipped{border:2px solid var(--cyan);box-shadow:0 0 15px var(--cyan);transform:scale(1.05);background:#0a1a1a}.inv-item .sell-btn{background:#ff4d4d;border:none;color:#fff;font-size:10px;padding:4px 5px;border-radius:4px;margin-top:8px;cursor:pointer;width:100%;font-weight:700}
+.inv-item-name{font-size:11px;font-weight:700;margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.equipped-tag{display:none;font-size:8px;background:var(--cyan);color:#000;padding:2px 4px;border-radius:3px;font-weight:700;margin-top:4px} .inv-item.equipped .equipped-tag{display:inline-block}#gacha-modal,#item-info-modal,#login-modal,#mail-modal,#msg-modal,#death-modal,#mini-battle-modal,#update-board-modal,#vip-modal{display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.95);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#item-info-modal,#msg-modal{z-index:2000;background:rgba(0,0,0,.85)}#death-modal{z-index:9999;background:rgba(20,0,0,.95)}#mini-battle-modal{z-index:2500;}
+.gacha-grid-popup{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:15px;background:#111;padding:20px;border-radius:15px;border:2px solid var(--cyan);width:90%;max-width:600px;max-height:60vh;overflow-y:auto;box-shadow:0 0 20px var(--cyan),inset 0 0 10px var(--cyan)} .gacha-close-btn{margin-top:20px;padding:10px 40px;font-size:16px;font-weight:700;background:#ff4d4d;border:none;border-radius:8px;color:#fff;cursor:pointer;z-index:10}.mail-card{background:#1a1a1a;padding:20px;border-radius:15px;border:2px solid var(--cyan);width:90%;max-width:400px;max-height:70vh;overflow-y:auto}
+.mail-item{background:#222;border:1px solid #444;padding:10px;margin-bottom:10px;border-radius:8px;text-align:left}.msg-box{background:#222;border:2px solid var(--cyan);padding:25px;border-radius:12px;text-align:center;width:80%;max-width:320px;color:#fff;font-weight:700;line-height:1.5}
+.gacha-card-flip{height:180px;width:120px;perspective:1000px;cursor:pointer;margin:0 auto}.gacha-inner{width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d} .gacha-card-flip.revealed .gacha-inner{transform:rotateY(180deg)}.gacha-back,.gacha-front{width:100%;height:100%;position:absolute;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;font-size:14px;font-weight:700;padding:5px}.gacha-back{background:#333;border:2px dashed #555;font-size:40px} .gacha-front{transform:rotateY(180deg)}.gacha-front i{font-size:30px;margin-bottom:10px}
+#cutscene-modal{display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:#000;z-index:3000;flex-direction:column;align-items:center;justify-content:center;animation:neonFlash 1.5s infinite alternate} @keyframes neonFlash{0%{box-shadow:0 0 50px #00fbff inset;background:rgba(0,255,255,.1)}100%{box-shadow:0 0 100px #f0f inset;background:rgba(255,0,255,.2)}}
+.cutscene-container{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;perspective:1000px}.cutscene-card{width:140px;height:200px;transition:transform 1.5s ease-in-out;transform-style:preserve-3d;cursor:pointer} .cutscene-card .gacha-back,.cutscene-card .gacha-front{font-size:16px;border-radius:15px;border-width:3px}.cutscene-card .gacha-front i{font-size:50px}.cutscene-card.revealed{transform:rotateY(180deg) scale(1.2);z-index:10}
+.cutscene-skip-btn{position:absolute;bottom:30px;padding:10px 30px;font-weight:700;background:#fff;color:#000;border:none;border-radius:20px;cursor:pointer;animation:pulse 1s infinite}
+.login-card{background:#1a1a1a;padding:25px;border-radius:20px;border:2px solid var(--cyan);width:90%;max-width:400px}.login-day-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:20px 0} .day-box{background:#333;font-size:10px;padding:8px;border-radius:8px;opacity:.5;font-weight:700}.day-box.active{opacity:1;border:2px solid var(--gold);background:#444}
+#p-adventure{justify-content:flex-start;align-items:center;text-align:center;overflow-y:auto;padding-top:20px}.adv-left,.adv-right{display:flex;flex-direction:column;align-items:center;width:100%} .slime-container-box{margin-top:30px;position:relative;width:100%;display:flex;justify-content:center;align-items:flex-end;gap:20px;flex-wrap:wrap;min-height:180px;padding-bottom:15px}
+.slime-wrapper{display:flex;flex-direction:column;align-items:center;transition:.3s;position:relative;margin-bottom:10px}.slime-wrapper.targeted .slime{box-shadow:0 0 25px var(--gold),0 5px 0 #228b22;border-color:var(--gold);transform:scale(1.15)} .target-arrow{display:none;color:var(--gold);font-size:20px;position:absolute;top:-30px;animation:bounce 1s infinite;text-shadow:0 0 5px #000}.slime-wrapper.targeted .target-arrow{display:block}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}.slime{width:90px;height:90px;background:#32cd32;border-radius:50% 50% 40% 40%;border:4px solid #228b22;display:flex;align-items:center;justify-content:center;font-size:40px;box-shadow:0 5px 0 #228b22;position:relative;z-index:10;cursor:pointer;transition:.3s}
+.mob-hp-bar{width:100px;height:14px;background:#333;border:1px solid #444;border-radius:7px;overflow:hidden;position:relative}.hp-fill{height:100%;background:#ff4d4d;width:100%;transition:width .1s} .mob-hp-text{position:absolute;width:100%;text-align:center;font-size:10px;font-weight:700;line-height:14px;color:#fff;text-shadow:1px 1px 2px #000;z-index:5;pointer-events:none} .mob-name-tag{width:100px;font-size:10px;text-align:center;color:var(--cyan);font-weight:700;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:1px 1px 2px #000}
+.player-hp-bar{width:80%;max-width:400px;height:22px;background:#333;border:2px solid #444;border-radius:11px;margin:5px auto;overflow:hidden;position:relative} .sword-effect{position:absolute;width:200%;height:25px;background:linear-gradient(90deg,transparent,#00fbff,#fff,#00fbff,transparent);box-shadow:0 0 25px #00fbff;top:50%;left:-200%;transform:translateY(-50%) rotate(-5deg);z-index:20;pointer-events:none;opacity:0}
+.slash-anim{animation:slashAction .4s ease-out forwards}@keyframes slashAction{0%{left:-200%;opacity:1}100%{left:200%;opacity:0}} .punch-effect{position:absolute;font-size:60px;z-index:50;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0;pointer-events:none}.punch-anim{animation:punchAction .3s ease-out} @keyframes punchAction{0%{transform:translate(-50%,-50%) scale(.5);opacity:1}100%{transform:translate(-50%,-50%) scale(2);opacity:0}}
+#action-box{width:100%;margin-top:20px;padding:10px}.action-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;width:100%;margin-top:10px} .sq-btn{width:75px;height:75px;border-radius:12px;border:2px solid #555;background:#222;color:#fff;font-size:10px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5px;transition:.2s;text-align:center}
+.sq-btn:active{transform:scale(.95)}.sq-btn:disabled{opacity:.5;cursor:not-allowed;border-color:#444;color:#666;transform:none}.sq-btn i{font-size:28px;margin-bottom:4px;font-style:normal} .sq-btn.skill{border-color:var(--cyan);color:var(--cyan);background:#1a2a2a}.sq-btn.normal{border-color:#fff;background:#333}.sq-btn.mage{border-color:#c0f;color:#c0f;background:#2a1a2a}.sq-btn.heavy{border-color:#ff4500;color:#ff4500;background:#2a1a2a}
+.info-bar{padding:10px;background:#1a1a1a;border-bottom:1px solid #222;text-align:center}.pity-counter{font-size:16px;font-weight:900;color:#ffd700;margin:5px 0}.main-content{flex:1;overflow-y:auto;padding:15px 15px 80px} .rarity-table{background:#1a1a1a;border-radius:12px;padding:12px;margin-bottom:15px;border:2px solid var(--gold);box-shadow:0 0 10px var(--gold), inset 0 0 10px var(--gold);font-size:11px}.rarity-row{display:flex;justify-content:space-between;padding:4px 6px;border-bottom:1px solid #222}
+.banner-card{background:#1e1e1e;border-radius:15px;padding:15px;margin-bottom:15px;text-align:center;border:2px solid #f0f;box-shadow:0 0 10px #f0f, inset 0 0 10px #f0f;}.btn-group{display:flex;flex-direction:row;gap:10px;justify-content:center;margin-top:10px} .summon{width:48%;padding:12px 5px;border-radius:10px;border:none;font-weight:700;cursor:pointer;font-size:12px}.nav-bar{height:auto;padding:10px 0;background:#1a1a1a;display:flex;justify-content:space-around;align-items:center;border-top:1px solid #333;flex-shrink:0;z-index:200}
+.nav-btn{color:#666;font-weight:700;font-size:11px;cursor:pointer;flex:1;text-align:center;transition:.2s;display:flex;flex-direction:column;gap:4px;align-items:center}.nav-btn i{font-size:24px;font-style:normal} .nav-active,.nav-btn:hover{color:var(--cyan);text-shadow:0 0 10px var(--cyan)}.nav-active i,.nav-btn:hover i{text-shadow:0 0 15px var(--cyan)}
+.god-relic{background:var(--god);color:#000}.ultra-relic{background:var(--ur)}.ultra-rainbow{background:var(--urb)}.rainbow{background:var(--rb)}.heroic{background:var(--heroic)}.legendary{background:var(--legend);color:#000}.epic{background:var(--epic)}.rare{background:var(--rare)}.uncommon{background:var(--uncom);color:#000}.common{background:#444;color:#ddd}
+.burn-effect{box-shadow:0 0 25px #ff4500 inset!important;animation:burnPulse .5s infinite}.freeze-effect{filter:hue-rotate(180deg) brightness(1.2);pointer-events:none;opacity:.8}.stun-effect{animation:stunPulse .2s infinite}.curse-effect{filter:grayscale(50%) sepia(50%) hue-rotate(250deg);animation:cursePulse 1s infinite}
+@keyframes burnPulse{50%{opacity:.6}}@keyframes stunPulse{0%,100%{transform:translate(2px)}100%{transform:translate(-2px)}}@keyframes cursePulse{50%{filter:brightness(.7) hue-rotate(250deg)}}
+.back-btn{position:absolute;top:20px;right:20px;background:#333;color:#fff;border:1px solid #444;padding:8px 15px;border-radius:8px;font-size:12px;cursor:pointer;z-index:101;font-weight:700}
+.wb-title{position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-weight:bold;color:var(--gold);text-shadow:1px 1px 2px #000;white-space:nowrap;font-size:12px} #world-boss-icon{width:50px;height:50px;border-radius:50%;background:#228b22;border:2px solid var(--legend);cursor:pointer;box-shadow:0 0 10px var(--legend);display:flex;align-items:center;justify-content:center;font-size:30px} .btn-retreat-boss{border-radius:50%;width:50px;height:50px;position:absolute;bottom:20px;right:20px;z-index:999;background:#550000;border:2px solid #ff4d4d;color:#fff;font-weight:bold;display:none;font-size:16px;} .crack-fx{position:absolute;width:100px;height:100px;background:radial-gradient(circle,rgba(255,255,255,.8) 10%,transparent 50%);border-radius:50%;animation:crackAnim .3s ease-out forwards;pointer-events:none;transform:translate(-50%,-50%)} @keyframes crackAnim{0%{transform:scale(0);opacity:1}100%{transform:scale(2);opacity:0}}
+#p-book{background:#0a0a0a;z-index:150;padding:25px 25px 80px;overflow-y:auto;text-align:center}.book-section{margin:0 auto 25px;max-width:600px;text-align:left;border:1px solid #333;padding:15px;border-radius:12px} .book-title{color:var(--gold);font-size:20px;font-weight:700;border-bottom:2px solid var(--gold);margin-bottom:12px;padding-bottom:8px;text-align:center}.book-item{font-size:12px;margin-bottom:8px;border-bottom:1px solid #222;padding-bottom:5px}.dmg-phys{color:#ff4d4d}.dmg-mag{color:#c0f}
+.loading-bar-wrap{width:80%;background:#222;height:20px;border-radius:10px;margin:10px auto;overflow:hidden;display:none}.loading-fill{height:100%;background:var(--cyan);width:0;transition:width .1s}
+.stone-info{display:flex;justify-content:space-between;background:#111;padding:8px;border:1px solid #333;border-radius:8px;margin-bottom:10px;font-size:11px;} .stone-info span{color:#00fbff;font-weight:bold;}
+@media (min-width:768px){.mobile-container{max-width:1000px;max-height:850px;border-radius:20px;border:4px solid #333}.nav-bar{border-radius:0 0 16px 16px;padding:15px 0}.nav-btn{font-size:14px;flex-direction:row;justify-content:center;gap:8px}.nav-btn i{font-size:24px}#p-adventure{flex-direction:row;padding:20px;align-items:stretch;justify-content:space-between;overflow:hidden}.adv-left{flex:1;justify-content:flex-start;height:100%;overflow-y:auto;padding-bottom:20px}.adv-right{width:35%;max-width:350px;border-left:2px solid #333;justify-content:center;height:100%;padding:0 20px;background:#0a0a0a;overflow-y:auto}.boss-slime-style{transform:scale(1.3)!important;margin:20px!important}.slime-wrapper.targeted .boss-slime-style{transform:scale(1.4)!important}}
+</style></head><body oncontextmenu="return false;"> <div class="mobile-container" id="main-container">
 
-    <div id="p-menu" class="page active-flex">
-        <div class="title">ADVENTURE ENDLESS DEMO</div>
-        <div class="version">v0.3.0 beta</div>
-        <button class="play-btn" data-t="play" onclick="openClassSelect()">PLAY</button>
-        <div class="save-load-group">
-            <button class="menu-sub-btn" data-t="save" onclick="saveGame()">SAVE</button>
-            <button class="menu-sub-btn" data-t="load" onclick="loadGame()">LOAD</button>
-        </div>
-        <button class="menu-sub-btn" style="margin-top:10px;" onclick="toggleLang()">VI / EN</button>
-    </div>
-    <div id="p-class-select" class="page">
-        <h2 style="color:var(--cyan); margin-bottom: 20px;" data-t="selectClass">CHỌN CLASS</h2>
-        <div class="class-grid">
-            <div class="class-card" onclick="selectClass('Kiếm Sĩ', '⚔️')"><i>⚔️</i><span data-t="classKiemSi">Kiếm Sĩ</span></div>
-            <div class="class-card" onclick="selectClass('Đấu Sĩ', '🥊')"><i>🥊</i><span data-t="classDauSi">Đấu Sĩ</span></div>
-            <div class="class-card" onclick="selectClass('Tầm Xa', '🏹')"><i>🏹</i><span data-t="classTamXa">Tầm Xa</span></div>
-            <div class="class-card" onclick="selectClass('Trợ Thủ', '🧪')"><i>🧪</i><span data-t="classTroThu">Trợ Thủ</span></div>
-            <div class="class-card" onclick="selectClass('Pháp Sư', '🪄')"><i>🪄</i><span data-t="classPhapSu">Pháp Sư</span></div>
-            <div class="class-card" onclick="selectClass('Sát Thủ', '🗡️')"><i>🗡️</i><span data-t="classSatThu">Sát Thủ</span></div>
-        </div>
-    </div>
-    <div id="ui-game">
-        <button class="back-btn" onclick="backToMenu()">MENU</button>
-        <button class="lang-btn" onclick="toggleLang()">EN/VI</button>
-        <div class="header-wallet">
-            <div class="coin-slot" style="color:#ff4500; border-color:#ff4500;">GOD: <span id="v-godc">0</span></div>
-            <div class="coin-slot" style="color:#ff00ff; border-color:#ff00ff;">RBC: <span id="v-rb">0</span></div>
-            <div class="coin-slot" style="color:#ffd700; border-color:#ffd700;">GOLD: <span id="v-gold">0</span></div>
-        </div>
-        <div class="content-area">
-            <div id="p-lobby" class="page">
-                <div class="lobby-content">
-                    <input type="file" id="av-file" hidden onchange="setAvatar(event)">
-                    <div class="avatar-box" onclick="document.getElementById('av-file').click()" title="Đổi ảnh đại diện">
-                        <div id="av-img-holder" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
-                            <span id="av-text" style="font-size: 40px;">👤</span>
-                        </div>
-                        <div class="edit-tag">EDIT</div>
-                    </div>
-                    <div class="name-display" id="display-name" onclick="changeName()">IDOKU</div>
-                    
-                    <div id="points-alert" class="points-alert">AVAILABLE: <span id="v-points">0</span> POINTS</div>
+<div id="msg-modal"><div class="msg-box"><div id="msg-text" style="margin-bottom: 20px; font-size: 14px;">Message</div><button class="play-btn" style="padding: 10px 30px; font-size: 14px; width:100%;" onclick="closeMsg()">OK</button></div></div>
+<div id="mini-battle-modal"><h2 style="color:#ff4500; text-shadow: 0 0 10px #ff4500;">WILD SLIME APPEARED!</h2><div style="font-size:60px;margin:20px;animation:pulse 1s infinite;">🟢</div><div style="color:#fff;font-weight:bold;margin-bottom:20px;font-size:18px;">HP: <span id="mini-slime-hp">100</span>/100</div><button class="sq-btn normal" style="width:100px; height:100px; font-size:14px;" onclick="hitMiniSlime()"><i>⚔️</i><span>ATTACK</span></button></div>
+<div id="death-modal"><h1 style="color:red;font-size:36px;text-shadow:0 0 20px red;margin-bottom:20px;">YOU DIED</h1><p style="color:#aaa;font-size:12px;margin-bottom:30px;">Boss is too strong, gear up!</p><button class="play-btn" style="background:#444;color:#fff;margin-bottom:15px;width:80%;max-width:300px;" onclick="respawn()">Return to Lobby</button><button id="btn-revive" class="play-btn" style="background:#ff4500;color:#fff;width:80%;max-width:300px;font-size:16px;" onclick="useElixirRevive()">🧬 Use Revive Elixir</button></div>
+<div id="item-info-modal"><div class="msg-box" style="border-color: var(--gold); text-align: left; position: relative;"><div id="item-info-content" style="font-size: 12px; margin-bottom: 15px; font-weight: normal;">...</div><button id="repair-btn" class="play-btn" style="padding: 8px 15px; font-size: 12px; width:100%; background: #32cd32; display: none; margin-bottom: 10px;" onclick="repairItem()">REPAIR WEAPON</button><button class="play-btn" style="padding: 10px 20px; font-size: 12px; width:100%;" onclick="closeItemInfo()">CLOSE</button></div></div>
+<div id="mail-modal"><div class="mail-card"><h2 style="color:var(--gold); margin-top:0;">MAILBOX</h2><div id="mail-list" style="margin-top: 15px;"></div><button class="play-btn" style="padding:10px 40px; font-size: 14px; width: 100%; margin-top: 15px; background: #ff4d4d; color: #fff;" onclick="closeMailbox()">CLOSE</button></div></div>
+<div id="login-modal"><div class="login-card"><h2 style="color:var(--gold); margin-top:0;">DAILY LOGIN</h2><div id="login-msg" style="font-size: 12px; margin-bottom: 10px;">Resets at 0:00 (GMT+7)</div><div class="login-day-grid" id="login-grid"><div class="day-box" id="d1">D1: 20R</div><div class="day-box" id="d2">D2: 40R</div><div class="day-box" id="d3">D3: 60R</div><div class="day-box" id="d4">D4: 80R</div><div class="day-box" id="d5">D5: 100R<br>+20kG</div><div class="day-box" id="d6">D6: 120R</div><div class="day-box" id="d7">D7: 5 God</div></div><button class="play-btn" style="font-size:16px; padding:10px 40px; width: 100%;" onclick="claimLogin()">CLAIM REWARD</button></div></div>
+<div id="cutscene-modal"><h1 style="color: #fff; text-shadow: 0 0 20px var(--cyan); margin-bottom: 40px;">⚠️ WARNING: GOD TIER DETECTED! ⚠️</h1><div class="cutscene-container" id="cutscene-container"></div><button class="cutscene-skip-btn" onclick="skipCutscene()">SKIP / CONTINUE</button></div>
+<div id="gacha-modal"><h2 style="color:var(--gold); text-shadow: 0 0 10px var(--gold); margin-bottom: 20px;">SUMMON RESULT</h2><div style="font-size: 12px; color: #888; margin-bottom: 10px;">AUTO FLIP</div><div class="gacha-grid-popup" id="gacha-result-grid"></div><button class="gacha-close-btn" onclick="closeGacha()">CLOSE</button></div>
 
-                    <div style="font-size: 10px; color: var(--cyan); margin-bottom: 5px;">LV: <span id="v-lv">1</span> / 10,000</div>
-                    <div class="xp-container"><div id="xp-bar"></div></div>
-                    
-                    <div class="extra-inv">
-                        <div class="chest-info">
-                            <div class="extra-slot"><span>📦</span><b><span data-t="chestLabel">RƯƠNG</span>: <span id="v-chest">0</span></b></div>
-                            <div class="extra-slot"><span>🔑</span><b><span data-t="keyLabel">CHÌA</span>: <span id="v-key">0</span></b></div>
-                        </div>
-                        <div class="chest-btns">
-                            <button class="open-chest-btn" onclick="openChest(1)">X1</button>
-                            <button class="open-chest-btn" onclick="openChest(10)">X10</button>
-                            <button class="open-chest-btn" onclick="openChest(100)">X100</button>
-                        </div>
-                    </div>
+<div id="update-board-modal"><div class="msg-box" style="width:90%;max-width:400px;text-align:left;"><h2 style="color:var(--cyan);text-align:center;margin-top:0;">LATEST UPDATES</h2><ul style="font-size:12px;padding-left:20px;line-height:1.6;color:#ccc;"><li><b>[SYSTEM]</b> VIP Package Added (Cost: 20 God Coins)</li><li><b>[ITEM]</b> Added Lucky Money Pouch (Epic Accessory)</li><li><b>[FIX]</b> Mage Normal Attack Stun Icon changed to ⚡</li><li><b>[FIX]</b> Potion Tier Locks applied. Cannot mix Tier I and II</li><li><b>[UI]</b> Stats now dynamically show Base + Equipment Bonus</li></ul><button class="play-btn" style="padding:10px 30px; font-size:14px; width:100%; margin-top:15px;" onclick="document.getElementById('update-board-modal').style.display='none'">CLOSE</button></div></div>
 
-                    <div class="code-input-group">
-                        <input type="text" class="code-field" id="giftcode-input" placeholder="NHẬP GIFTCODE...">
-                        <button class="code-btn" data-t="codeEnter" onclick="useCode()">NHẬP</button>
-                    </div>
+<div id="vip-modal"><div class="msg-box" style="border-color:var(--gold);"><h2 style="color:var(--gold);margin-top:0;">🌟 BECOME A VIP 🌟</h2><div style="font-size:12px;margin-bottom:15px;color:#ccc;"><b>Cost:</b> 20 God Coins<br><br><div style="text-align:left; background:#111; padding:10px; border-radius:8px; border:1px dashed var(--gold);"><b>PERKS:</b><br>- Exclusive <b>[VIP]</b> Title<br>- <b>VIP Sword</b> (ATK 10k, DEF 1k, LUCK +150, SPD +30, Crit 80%, CritDmg x4)<br>- 40x Tier I to V Repair Stones</div></div><button class="play-btn" style="background:var(--gold);color:#000;width:100%;padding:10px;font-size:14px;" onclick="buyVip()">BUY VIP PACKAGE</button><div style="display:flex;gap:10px;margin-top:10px;"><button class="play-btn" style="flex:1;background:#444;color:#fff;padding:8px;font-size:10px;" onclick="closeVip(true)">Don't Show Today</button><button class="play-btn" style="flex:1;background:#ff4d4d;color:#fff;padding:8px;font-size:10px;" onclick="closeVip(false)">Close</button></div></div></div>
 
-                    <div class="stats-container" style="margin-top:10px;">
-                        <div class="stat-item">
-                            <div class="stat-label">ATK</div><div class="stat-val" id="st-atk">10</div>
-                            <button class="add-btn" onclick="addStat('atk')">+</button>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">MAX HP</div><div class="stat-val" id="st-hp">100</div>
-                            <button class="add-btn" onclick="addStat('hp')">+</button>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">DEF</div><div class="stat-val" id="st-def">10</div>
-                            <button class="add-btn" onclick="addStat('def')">+</button>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">LUCK</div><div class="stat-val" id="st-luck">1</div>
-                            <button class="add-btn" onclick="addStat('luck')">+</button>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label" data-t="classLabel">CLASS</div><div id="display-class" class="stat-val">-</div>
-                        </div>
-                    </div>
-
-                    <div class="inventory-box">
-                        <div class="stat-label" style="color:var(--cyan); border-bottom: 1px solid #333;" data-t="invLabel">NHẤN ĐỂ TRANG BỊ UNIT</div>
-                        <div id="inv-grid" class="inventory-grid"></div>
-                    </div>
-                </div>
-            </div>
-            <div id="p-adventure" class="page">
-                <div style="padding:10px; width:80%">
-                    <div class="stat-label">PLAYER HP: <span id="cur-p-hp">100</span> <span id="status-tag" style="color:#ff4500; font-weight:bold;"></span></div>
-                    <div class="hp-bar" style="width:100%"><div id="p-hp-fill" class="hp-fill" style="background:#00ff66; width:100%"></div></div>
-                </div>
-                <h3 id="mob-name" style="color:var(--cyan)">SLIME ZONE</h3>
-                <div class="slime-container">
-                    <div id="vfx-slash" class="sword-effect"></div>
-                    <div class="hp-bar">
-                        <div class="hp-text" id="mob-hp-val">150 / 150</div>
-                        <div id="hp-fill" class="hp-fill"></div>
-                    </div>
-                    <div class="slime" id="slime-mob" onclick="hitSlime()">💧</div>
-                    <p id="battle-log" style="color:#ff4d4d; font-size:10px; height:10px;"></p>
-                    <div id="action-box">
-                        <div id="skill-box" style="display:none;">
-                            <button class="skill-btn" id="main-skill-btn" onclick="nhatKiemTram()">Skill Name</button>
-                        </div>
-                        <button class="normal-hit-btn" id="normal-hit-btn" data-t="normalHit" onclick="hitSlime()">ĐÁNH THƯỜNG ⚡</button>
-                    </div>
-                </div>
-            </div>
-            <div id="p-summon" class="page">
-                <div class="info-bar"><div class="pity-counter">PITY: <span id="pity-count">0</span>/100</div></div>
-                <div class="main-content">
-                    <div class="rarity-table" id="r-table"></div>
-                    <div class="banner-card">
-                        <h4 style="margin:0; color:#ff00ff;" data-t="bannerTitle">UNIT BANNER</h4>
-                        <div class="btn-group">
-                            <button class="summon" style="background:#444;color:#fff" onclick="pull(1, 'rb')">100 RBC [X1]</button>
-                            <button class="summon" style="background:#222;color:var(--gold); border:1px solid var(--gold)" onclick="pull(10, 'gold')">2,000,000 GOLD [X10]</button>
-                            <button class="summon" style="background:#ffd700;color:#000" onclick="pull(10, 'rb')">1000 RBC [X10]</button>
-                            <button class="summon" style="background:var(--god);color:#000" onclick="pull(10, 'god')">1 GOD COIN [X10]</button>
-                        </div>
-                    </div>
-                </div>
-                <div id="results" class="result-tray"></div>
-            </div>
-        </div>
-        <div class="nav-bar">
-            <div id="nav-lobby" class="nav-btn" data-t="navLobby" onclick="goTo('lobby')">LOBBY</div>
-            <div id="nav-adventure" class="nav-btn" data-t="navAdventure" onclick="goTo('adventure')">ADVENTURE</div>
-            <div id="nav-summon" class="nav-btn" data-t="navSummon" onclick="goTo('summon')">SUMMON</div>
-        </div>
-    </div>
-</div>
+<div id="p-menu" class="page active-flex"><div class="title">ADVENTURE ENDLESS</div><div class="version">v1.1.0</div><div class="credit">Dev: Tatsuki Idoku & To Kiet Khang</div><button class="play-btn" onclick="startNewGame()">NEW GAME</button><div class="save-load-group"><div class="slot-row" style="background: #1a2a1a; border-color: #32cd32;"><span class="slot-name" id="name-sauto" style="color: #32cd32;">Auto-Save: Empty</span><button class="slot-btn" style="border-color: #32cd32; color: #32cd32;" onclick="loadGame('auto')">LOAD</button></div><div class="slot-row"><span class="slot-name" id="name-s1">Slot 1: Empty</span><button class="slot-btn" onclick="saveGame(1)">SAVE</button><button class="slot-btn" onclick="loadGame(1)">LOAD</button><button class="slot-btn del-btn" onclick="deleteSave(1)">X</button></div><div class="slot-row"><span class="slot-name" id="name-s2">Slot 2: Empty</span><button class="slot-btn" onclick="saveGame(2)">SAVE</button><button class="slot-btn" onclick="loadGame(2)">LOAD</button><button class="slot-btn del-btn" onclick="deleteSave(2)">X</button></div><div class="slot-row"><span class="slot-name" id="name-s3">Slot 3: Empty</span><button class="slot-btn" onclick="saveGame(3)">SAVE</button><button class="slot-btn" onclick="loadGame(3)">LOAD</button><button class="slot-btn del-btn" onclick="deleteSave(3)">X</button></div></div></div>
+<div id="p-class-select" class="page"><h2 style="color:var(--cyan); margin-bottom: 30px;">CHOOSE CLASS</h2><div class="class-grid"><div class="class-card" onclick="selectClass('Swordsman')"><i>⚔️</i><span>Swordsman</span></div><div class="class-card" onclick="selectClass('Fighter')"><i>🥊</i><span>Fighter</span></div><div class="class-card" onclick="selectClass('Ranger')"><i>🏹</i><span>Ranger</span></div><div class="class-card" onclick="selectClass('Supporter')"><i>🧪</i><span>Supporter</span></div><div class="class-card" onclick="selectClass('Mage')"><i>🪄</i><span>Mage</span></div><div class="class-card" onclick="selectClass('Assassin')"><i>🗡️</i><span>Assassin</span></div></div></div>
+<div id="ui-game"><button class="back-btn" onclick="backToMenu()">MENU</button><div class="header-wallet"><div class="coin-slot" style="color:#ff4500; border-color:#ff4500;">👑 GOD: <span id="v-godc">0</span></div><div class="coin-slot" style="color:#f0f; border-color:#f0f;">💎 RBC: <span id="v-rb">0</span></div><div class="coin-slot" style="color:#ffd700; border-color:#ffd700;">💰 GOLD: <span id="v-gold">0</span></div><div class="coin-slot" style="color:#a020f0; border-color:#a020f0;">🔮 SOUL: <span id="v-soul">0</span></div></div><div class="content-area"><div id="p-lobby" class="page"><div style="position:absolute;top:15px;left:15px;z-index:100;text-align:center;"><div class="wb-title">WORLD BOSS</div><div id="world-boss-icon" onclick="startWorldBoss()" title="Giant Slime Boss">🟢</div></div><div class="lobby-content"><input type="file" id="av-file" hidden onchange="setAvatar(event)"><div class="avatar-box" onclick="document.getElementById('av-file').click()"><div id="av-img-holder" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;"><span id="av-text" style="font-size: 50px;">👤</span></div><div class="edit-tag">EDIT</div></div><div class="name-display" id="display-name" onclick="changeName()">USER</div><div style="display:flex; justify-content:center; gap: 10px; margin-bottom: 10px;"><button class="skill-btn" style="padding:10px; font-size:12px; border-color: var(--gold); color: var(--gold);" onclick="openMailbox()">✉️ MAIL (<span id="mail-count">0</span>)</button><button class="skill-btn" style="padding:10px; font-size:12px;" onclick="goTo('book')">BOOK</button><button class="skill-btn" style="padding:10px; font-size:12px; border-color: #ff00ff; color: #ff00ff;" onclick="document.getElementById('update-board-modal').style.display='flex'">📜 UPDATES</button><button class="skill-btn" style="padding:10px; font-size:12px; border-color: #32cd32; color: #32cd32;" onclick="exploreAround()">🔍 EXPLORE</button></div><div id="explore-msg" style="color:#32cd32;font-size:14px;margin-bottom:10px;display:none;"></div><div class="loading-bar-wrap" id="explore-load"><div class="loading-fill" id="explore-fill"></div></div><button class="skill-btn" style="background:#444; color:#fff; width: 80%; padding:10px;" onclick="goTo('inventory')">🎒 INVENTORY (<span id="btn-inv-count">0</span>/<span id="btn-inv-max">20</span>)</button><div id="points-alert" class="points-alert">AVAILABLE: <span id="v-points">0</span> POINTS</div><div class="equip-grid"><div class="equip-slot" onclick="unequipItem('hat')"><b>HAT</b><span id="eq-hat">-</span></div><div class="equip-slot" onclick="unequipItem('armor')"><b>ARMOR</b><span id="eq-armor">-</span></div><div class="equip-slot" onclick="unequipItem('pants')"><b>PANTS</b><span id="eq-pants">-</span></div><div class="equip-slot" onclick="unequipItem('shoes')"><b>SHOES</b><span id="eq-shoes">-</span></div><div class="equip-slot" onclick="unequipItem('gloves')"><b>GLOVES</b><span id="eq-gloves">-</span></div><div class="equip-slot" onclick="unequipItem('mainWep')" style="grid-column: span 1;"><b>MAIN WEP</b><span id="eq-mainWep">-</span></div><div class="equip-slot" onclick="unequipItem('subWep')" style="grid-column: span 1;"><b>SUB WEP</b><span id="eq-subWep">-</span></div><div class="equip-slot" onclick="unequipItem('accessory')" style="grid-column: span 1; border-color: #32cd32;"><b>ACCESSORY</b><span id="eq-accessory">-</span></div><div class="equip-slot" onclick="unequipItem('consumableSlot')" style="grid-column: span 1; border-color: #ff4500;"><b>CONSUME</b><span id="eq-consumableSlot">-</span></div></div><div style="font-size: 12px; font-weight: bold; color: var(--cyan); margin-bottom: 5px;">LV: <span id="v-lv">1</span> / 10,000</div><div class="xp-container"><div id="xp-bar"></div><div class="xp-text-overlay" id="xp-text-ui">0 / 100</div></div><div class="extra-inv"><div class="chest-info"><div class="extra-slot"><span>📦</span><b>CHEST: <span id="v-chest">0</span></b></div><div class="extra-slot"><span>🔑</span><b>KEY: <span id="v-key">0</span></b></div><div class="extra-slot" onclick="usePotion('luck')"><span>🍀</span><b>LUCK: <span id="v-p-luck">0</span></b><br><span id="t-p-luck" style="font-size:10px; color:yellow;"></span></div><div class="extra-slot" onclick="usePotion('xp')"><span>🧪</span><b>XP: <span id="v-p-xp">0</span></b><br><span id="t-p-xp" style="font-size:10px; color:yellow;"></span></div></div><div class="chest-btns"><button class="open-chest-btn" onclick="openChest(1)">OPEN X1</button><button class="open-chest-btn" onclick="openChest(10)">OPEN X10</button><button class="open-chest-btn" onclick="openChest(100)">OPEN X100</button></div></div><div class="code-input-group"><input type="text" class="code-field" id="giftcode-input" placeholder="GIFT CODE..."><button class="code-btn" onclick="useCode()">USE</button></div><div class="stats-container" style="margin-top:20px;"><div class="stat-item"><div class="stat-label">ATK</div><div class="stat-val" id="st-atk">10</div><button class="add-btn" onclick="addStat('atk')">+</button></div><div class="stat-item mag"><div class="stat-label">MATK</div><div class="stat-val" id="st-matk">10</div><button class="add-btn" onclick="addStat('matk')">+</button></div><div class="stat-item"><div class="stat-label">MAX HP</div><div class="stat-val" id="st-hp">100</div><button class="add-btn" onclick="addStat('hp')">+</button></div><div class="stat-item"><div class="stat-label">DEF</div><div class="stat-val" id="st-def">10</div><button class="add-btn" onclick="addStat('def')">+</button></div><div class="stat-item"><div class="stat-label">SPD</div><div class="stat-val" id="st-spd">10</div><button class="add-btn" onclick="addStat('spd')">+</button></div><div class="stat-item"><div class="stat-label">LUCK</div><div class="stat-val" id="st-luck">1</div><button class="add-btn" onclick="addStat('luck')">+</button></div><div class="stat-item" style="grid-column: span 2; text-align: center;"><div class="stat-label">CLASS</div><div id="display-class" class="stat-val" style="color:var(--cyan)">-</div></div></div></div></div>
+<div id="p-inventory" class="page"><div class="info-bar" style="position:relative;"><button class="back-btn" style="top:10px; right:15px; position:absolute;" onclick="goTo('lobby')">CLOSE</button><h3 style="margin:10px 0; color:var(--cyan);">🎒 INVENTORY</h3></div><div class="lobby-content" style="padding-top:15px;"><div class="stone-info">Repair Stones: <span id="v-st1">I: 0</span> <span id="v-st2">II: 0</span> <span id="v-st3">III: 0</span> <span id="v-st4">IV: 0</span> <span id="v-st5">V: 0</span></div><div style="font-size:14px; font-weight:bold; margin-bottom:15px;">Capacity: <span id="p-inv-count">0</span> / <span id="p-inv-max">20</span> Slots</div><button class="play-btn" style="padding:12px; font-size:13px; margin-bottom:20px; width:90%; max-width: 400px; background: var(--gold);" onclick="expandInventory()">🔓 +20 SLOTS (COST 1 GOD)</button><div class="inv-tabs"><div class="inv-tab active" id="tab-all" onclick="setInvFilter('all')">ALL</div><div class="inv-tab" id="tab-unit" onclick="setInvFilter('unit')">UNITS</div><div class="inv-tab" id="tab-weapon" onclick="setInvFilter('weapon')">WEAPONS</div><div class="inv-tab" id="tab-armor" onclick="setInvFilter('armor')">ARMOR</div><div class="inv-tab" id="tab-consum" onclick="setInvFilter('consumable')">ITEMS</div></div><div class="stat-label" style="color:var(--cyan); border-bottom: 2px solid #333; margin-bottom:15px; width:100%; text-align:center; padding-bottom: 10px; font-size: 12px;">TAP TO EQUIP - HOLD FOR INFO</div><div id="inv-grid" class="inventory-grid"></div></div></div>
+<div id="p-adventure" class="page"><button class="btn-retreat-boss" id="flee-boss-btn" onclick="fleeBoss()">X</button><div style="width:100%; text-align:center; background:#1a1a1a; padding:10px 0; border-bottom:2px solid #333; font-weight:bold; color:var(--cyan);">WORLD: ENDLESS SLIME WAVES</div><div class="adv-left"><div style="padding:10px; width:90%; max-width:400px; margin:0 auto;"><div class="stat-label" style="font-size: 12px; font-weight:bold; color: #fff;">PLAYER HP: <span id="cur-p-hp">100</span> <span id="status-tag" style="color:#ff4500; font-weight:bold;"></span></div><div class="player-hp-bar" style="width:100%"><div id="p-hp-fill" class="hp-fill" style="background:#00ff66; width:100%"></div></div></div><div id="mana-container" style="display:none; width:90%; max-width:400px; margin: 0 auto 10px auto;"><div class="stat-label" style="font-size: 10px; font-weight:bold; color: #fff; margin-bottom: 2px;">MANA: <span id="cur-p-mana">100</span></div><div class="player-hp-bar" style="width:100%; height: 12px; border-color: #225588; margin: 0 auto;"><div id="p-mana-fill" class="hp-fill" style="background:#00aaff; width:100%"></div></div></div><div style="font-weight:bold; color: #fff; margin-top: 10px;" id="wave-display">WAVE 1</div><div class="slime-container-box" id="slimes-display"><div id="vfx-slash" class="sword-effect"></div><div id="vfx-punch" class="punch-effect" style="display:none;">🥊</div></div><p id="battle-log" style="font-size:14px; font-weight:bold; height:20px; margin-top: 25px;"></p></div><div class="adv-right" id="action-box"><div class="action-row" id="action-buttons-container"></div></div></div>
+<div id="p-summon" class="page"><div class="info-bar" style="display: flex; justify-content: space-around;"><div class="pity-counter" style="font-size:14px;">UNIT PITY: <span id="pity-count">0</span>/100</div><div class="pity-counter" style="font-size:14px; color:var(--cyan);">WEAPON PITY: <span id="wpity-count">0</span>/100</div></div><div class="main-content"><div class="rarity-table" id="r-table"></div><div class="banner-card"><h3 style="margin:0 0 10px 0; color:#f0f;">UNIT BANNER</h3><div class="btn-group"><button class="summon" style="background:#444;color:#fff" onclick="pull(1, 'rb', 'unit')">100 RBC [X1]</button><button class="summon" style="background:#ffd700;color:#000" onclick="pull(1, 'gold', 'unit')">20k GOLD [X1]</button></div><div class="btn-group"><button class="summon" style="background:#444;color:#fff" onclick="pull(10, 'rb', 'unit')">1000 RBC [X10]</button><button class="summon" style="background:#ffd700;color:#000" onclick="pull(10, 'gold', 'unit')">200k GOLD [X10]</button></div></div><div class="banner-card" style="border-color:var(--cyan); box-shadow:0 0 10px var(--cyan), inset 0 0 10px var(--cyan);"><h3 style="margin:0 0 10px 0; color:var(--cyan);">WEAPON BANNER</h3><div class="btn-group"><button class="summon" style="background:#444;color:#fff" onclick="pull(1, 'rb', 'weapon')">100 RBC [X1]</button><button class="summon" style="background:var(--cyan);color:#000" onclick="pull(1, 'gold', 'weapon')">20k GOLD [X1]</button></div><div class="btn-group"><button class="summon" style="background:#444;color:#fff" onclick="pull(10, 'rb', 'weapon')">1000 RBC [X10]</button><button class="summon" style="background:var(--cyan);color:#000" onclick="pull(10, 'gold', 'weapon')">200k GOLD [X10]</button></div></div><div class="banner-card" style="border-color:#32cd32; box-shadow:0 0 10px #32cd32, inset 0 0 10px #32cd32;"><h3 style="margin:0 0 10px 0; color:#32cd32;">ACCESSORY BANNER</h3><div class="btn-group"><button class="summon" style="background:#444;color:#fff" onclick="pull(1, 'rb', 'accessory')">100 RBC [X1]</button><button class="summon" style="background:#32cd32;color:#000" onclick="pull(1, 'gold', 'accessory')">20k GOLD [X1]</button></div><div class="btn-group"><button class="summon" style="background:#444;color:#fff" onclick="pull(10, 'rb', 'accessory')">1000 RBC [X10]</button><button class="summon" style="background:#32cd32;color:#000" onclick="pull(10, 'gold', 'accessory')">200k GOLD [X10]</button></div></div><div class="banner-card" style="border-color:var(--gold); box-shadow:0 0 15px var(--gold), inset 0 0 10px var(--gold);"><h3 style="margin:0 0 10px 0; color:var(--gold);">SPECIAL SUMMON</h3><div class="btn-group"><button class="summon" style="background:var(--god);color:#000; border:1px solid #fff" onclick="pull(1, 'god', 'special')">1 GOD COIN [X1]</button><button class="summon" style="background:var(--god);color:#000; border:1px solid #fff" onclick="pull(10, 'god', 'special')">10 GOD COIN [X10]</button></div></div></div></div>
+<div id="p-shop" class="page"><div class="info-bar"><h3 style="margin:10px 0; color:var(--cyan);">SHOP</h3></div><div class="lobby-content"><div class="class-grid" style="grid-template-columns: 1fr;"><div class="class-card" style="border: 2px solid #a020f0;" onclick="buyItem('haura')"><i>🌌</i><span>Galaxy Sword<br>1 Soul Stone</span></div><div class="class-card" style="border: 2px solid var(--gold);" onclick="buyItem('xp')"><i>🧪</i><span>X2 XP Potion (10m)<br>100,000 G</span></div><div class="class-card" style="border: 2px solid var(--gold);" onclick="buyItem('luck')"><i>🍀</i><span>X2 LUCK Potion (10m)<br>100,000 G</span></div><div class="class-card" style="border: 2px solid #ff4500;" onclick="buyItem('elixir')"><i>🧬</i><span>Elixir (Auto Revive)<br>300 RBC / 2 God</span></div><div class="class-card" style="border: 2px solid var(--cyan);" onclick="buyItem('xp2')"><i>🧪</i><span>X2 XP Potion II (30m)<br>300,000 G</span></div><div class="class-card" style="border: 2px solid var(--cyan);" onclick="buyItem('luck2')"><i>🍀</i><span>X2 LUCK Potion II (30m)<br>300,000 G</span></div><div class="class-card" style="border: 2px solid #808080;" onclick="buyStones(1)"><i>🪨</i><span>Repair Stone I<br>10,000 G</span></div><div class="class-card" style="border: 2px solid #32cd32;" onclick="buyStones(2)"><i>🪨</i><span>Repair Stone II<br>20,000 G</span></div><div class="class-card" style="border: 2px solid #a020f0;" onclick="buyStones(3)"><i>🪨</i><span>Repair Stone III<br>50,000 G</span></div><div class="class-card" style="border: 2px solid #ff00ff;" onclick="buyStones(4)"><i>🪨</i><span>Repair Stone IV<br>1 RBC</span></div><div class="class-card" style="border: 2px solid var(--gold);" onclick="buyStones(5)"><i>🪨</i><span>Repair Stone V<br>1 God Coin</span></div></div></div></div>
+<div id="p-book" class="page"><button class="play-btn" style="font-size:14px; padding:10px 25px; position:sticky; top:0; z-index: 10;" onclick="goTo('lobby')">CLOSE</button><div id="book-content" style="margin-top: 15px;"></div></div></div>
+<div class="nav-bar"><div id="nav-lobby" class="nav-btn nav-active" onclick="goTo('lobby')"><i>🏠</i><span>LOBBY</span></div><div id="nav-adventure" class="nav-btn" onclick="goTo('adventure')"><i>⚔️</i><span>WORLD</span></div><div id="nav-summon" class="nav-btn" onclick="goTo('summon')"><i>🔮</i><span>SUMMON</span></div><div id="nav-shop" class="nav-btn" onclick="goTo('shop')"><i>🛒</i><span>SHOP</span></div></div></div>
 <script>
-    let randomID = Math.floor(10000 + Math.random() * 90000);
-    let playerName = "USER" + randomID;
-    let customAvatar = null;
-    // BẮT ĐẦU VỀ 0 NHƯ YÊU CẦU
-    let wallet = { gold: 0, rb: 0, god: 0, chest: 0, key: 0 }; 
-    let player = { lv: 1, xp: 0, nextXp: 100, points: 0, luck: 1, baseAtk: 10, baseDef: 10, baseHp: 100, curHp: 100, equippedIdx: null, class: "", burnTicks: 0, freezeTicks: 0, stunTicks: 0 };
-    let usedCodes = [];
-    let debuffCooldown = 0;
-    let skillCooldown = 0;
-    let inventory = [];
-    let pity = 0; 
-    let mob = { hp: 150, maxHp: 150, type: 0, count: 0 };
-    let battleTimer = null;
-    let currentLang = 'vi';
+let randomID=Math.floor(10000+Math.random()*90000),playerName="USER"+randomID,customAvatar=null,
+wallet={gold:0,rb:0,god:0,chest:0,key:0,pLuck:0,pXp:0,soulStone:0, stones:{1:0, 2:0, 3:0, 4:0, 5:0}},
+player={lv:1,xp:0,nextXp:100,points:0,luck:1,baseAtk:10,baseMatk:10,baseDef:10,baseHp:100,baseSpd:10,curHp:100,maxMana:100,curMana:100,equippedUnitUid:null,class:"",burnTicks:0,freezeTicks:0,stunTicks:0,curseTicks:0,luckBuff:0,xpBuff:0,luckBuffTier:0,xpBuffTier:0,maxInv:20,critChance:10,perfectCrit:2,revivesLeft:0,recoveryTicks:0,bloodTicks:0,tutorialDone:!1,isVip:!1},
+equipment={hat:null,armor:null,pants:null,shoes:null,gloves:null,mainWep:null,subWep:null,accessory:null,consumableSlot:null},
+usedCodes=[],mailbox=[],inventory=[],debuffCooldown=0,skillCooldown=0,heavyCooldown=0,pity=0,wpity=0,activeMobs=[],globalMobCount=0,targetIndex=0,battleTimer=null,autoSaveTimer=null,loginData={lastClaim:null,streak:0},lastSaveSlot=1,currentInvFilter='all',msgCallback=null,viewingItem=null,miniSlimeHp=100;
 
-    let loginData = { lastClaim: null, streak: 0 };
+const durMap = {"common":50, "uncommon":100, "rare":200, "epic":300, "legendary":400, "heroic":500, "rainbow":700, "ultra-rainbow":1000, "ultra-relic":1500, "god-relic":5000};
+const stoneMap = {"common":1, "uncommon":2, "rare":2, "epic":3, "legendary":3, "heroic":4, "rainbow":4, "ultra-rainbow":4, "ultra-relic":4, "god-relic":5};
 
-    const lang = {
-        vi: {
-            play: "PLAY", save: "SAVE", load: "LOAD", selectClass: "CHỌN CLASS",
-            classKiemSi: "Kiếm Sĩ", classDauSi: "Đấu Sĩ", classTamXa: "Tầm Xa",
-            classTroThu: "Trợ Thủ", classPhapSu: "Pháp Sư", classSatThu: "Sát Thủ",
-            classLabel: "CLASS", invLabel: "NHẤN ĐỂ TRANG BỊ UNIT",
-            normalHit: "ĐÁNH THƯỜNG ⚡", bannerTitle: "UNIT BANNER",
-            navLobby: "LOBBY", navAdventure: "ADVENTURE", navSummon: "SUMMON",
-            saved: "Đã lưu tiến trình!", noSave: "Không tìm thấy bản lưu!",
-            welcome: "Chào mừng trở lại!", fail: "Thất bại!", askName: "Nhập tên mới:",
-            rarityTitle: "PHÂN CẤP & TỈ LỆ", sell: "Bán",
-            chestLabel: "RƯƠNG", keyLabel: "CHÌA", openBtn: "MỞ RƯƠNG", codeEnter: "NHẬP", codePh: "NHẬP GIFTCODE...",
-            chestReq: "Không đủ Rương hoặc Chìa!", chestOpen: "Bạn đã mở rương:", chestEmpty: "Rương rỗng...",
-            skillName: "Nhất Kiếm Trảm Tà Ma ⚔️", skillCd: "ĐANG HỒI...", logHit: "Đánh: -", dropChest: "Rớt 1 RƯƠNG!", dropKey: "Rớt 1 CHÌA KHÓA!",
-            codeUsed: "Code đã dùng!", codeInvalid: "Code sai!", codeDemo: "Đã nhận quà DEMO!"
-        },
-        en: {
-            play: "PLAY", save: "SAVE", load: "LOAD", selectClass: "CHOOSE CLASS",
-            classKiemSi: "Swordsman", classDauSi: "Fighter", classTamXa: "Ranger",
-            classTroThu: "Supporter", classPhapSu: "Mage", classSatThu: "Assassin",
-            classLabel: "CLASS", invLabel: "TAP TO EQUIP UNIT",
-            normalHit: "NORMAL ATTACK ⚡", bannerTitle: "UNIT BANNER",
-            navLobby: "LOBBY", navAdventure: "BATTLE", navSummon: "SUMMON",
-            saved: "Progress saved!", noSave: "No save file found!",
-            welcome: "Welcome back!", fail: "Defeated!", askName: "Enter new name:",
-            rarityTitle: "RARITY & RATES", sell: "Sell",
-            chestLabel: "CHEST", keyLabel: "KEY", openBtn: "OPEN CHEST", codeEnter: "USE", codePh: "ENTER CODE...",
-            chestReq: "Not enough Chests or Keys!", chestOpen: "You opened:", chestEmpty: "Empty...",
-            skillName: "First Sword Slayer ⚔️", skillCd: "COOLDOWN...", logHit: "Hit: -", dropChest: "Found 1 CHEST!", dropKey: "Found 1 KEY!",
-            codeUsed: "Already used!", codeInvalid: "Invalid code!", codeDemo: "DEMO Reward claimed!"
-        }
-    };
+const rates=[
+{name:"God Relic",chance:.02,class:"god-relic",icon:"👑",price:{god:1,rb:50},atk:1500,hp:7000,units:["Idoku (God)","Shikami (Evil God)","Kyou"],weapons:["Hiranagi"]},
+{name:"Ultra Relic",chance:.08,class:"ultra-relic",icon:"💎",price:{rb:30},atk:1000,hp:5000,units:["God Ultra","Noir (Creation God)"],weapons:["Darkness"]},
+{name:"Ultra Rainbow",chance:.2,class:"ultra-rainbow",icon:"🌌",price:{rb:20},atk:600,hp:3000,units:["Idoku Awakening","Idoku Creation V0"],weapons:["Demon Sword"]},
+{name:"Rainbow",chance:.7,class:"rainbow",icon:"🌈",price:{rb:10},atk:350,hp:1500,units:["Idoku (Warrior)","Prism Soul"],weapons:["Rainbow Shield"]},
+{name:"Heroic",chance:2,class:"heroic",icon:"🔥",price:{gold:6400},atk:200,hp:800,units:["Strongest Hero","General X"],weapons:["Holy Sword"]},
+{name:"Legendary",chance:4,class:"legendary",icon:"🌟",price:{gold:3200},atk:120,hp:500,units:["Principal Kyou","Expedition Knight"],weapons:["Royal Armor"]},
+{name:"Epic",chance:8,class:"epic",icon:"🟣",price:{gold:1600},atk:70,hp:250,units:["Royal Captain","Master Mage"],weapons:["Mage Hat","Musket","Lucky Money Pouch"]},
+{name:"Rare",chance:15,class:"rare",icon:"🔵",price:{gold:800},atk:40,hp:120,units:["Rank A Adventurer","Elite Archer"],weapons:["Iron Axe","Brawler Gloves"]},
+{name:"Uncommon",chance:25,class:"uncommon",icon:"🟢",price:{gold:400},atk:20,hp:60,units:["Rank C Adventurer","Guard"],weapons:["Iron Shield","Bronze Shield","Ice Staff"]},
+{name:"Common",chance:45,class:"common",icon:"⚪",price:{gold:200},atk:8,hp:30,units:["Tamed Slime","Villager"],weapons:["Wooden Sword","Bamboo Sword"]}];
 
-    // CẬP NHẬT RATE MỚI
-    const rates = [
-        { name: "God Relic", rate: 0.02, class: "god-relic", icon: "👑", price: 5000, atk: 2000, hp: 10000, units: ["Idoku (God)", "Shikami (Evil God)"] },
-        { name: "Ultra Relic", rate: 0.5, class: "ultra-relic", icon: "💎", price: 2000, atk: 1000, hp: 5000, units: ["God Infinity - Creation", "Noir (God Form)"] },
-        { name: "Ultra Rainbow", rate: 1.5, class: "ultra-rainbow", icon: "🌌", price: 1000, atk: 600, hp: 3000, units: ["Infinite Aura", "Creation Power"] },
-        { name: "Rainbow", rate: 4.0, class: "rainbow", icon: "🌈", price: 500, atk: 350, hp: 1500, units: ["Idoku (Warrior)", "Prism Soul"] },
-        { name: "Heroic", rate: 8.0, class: "heroic", icon: "🔥", price: 300, atk: 200, hp: 800, units: ["Strongest Hero", "Crusade Knight"] },
-        { name: "Legendary", rate: 15.0, class: "legendary", icon: "🌟", price: 200, atk: 120, hp: 500, units: ["Principal Kyou", "High Mage"] },
-        { name: "Epic", rate: 25.0, class: "epic", icon: "🟣", price: 100, atk: 70, hp: 250, units: ["Royal Captain", "Master Mage"] },
-        { name: "Rare", rate: 32.0, class: "rare", icon: "🔵", price: 50, atk: 40, hp: 120, units: ["Rank A Adventurer", "Elite Archer"] },
-        { name: "Uncommon", rate: 40.0, class: "uncommon", icon: "🟢", price: 20, atk: 20, hp: 60, units: ["Rank C Adventurer", "Guard"] },
-        { name: "Common", rate: 100.0, class: "common", icon: "⚪", price: 5, atk: 8, hp: 30, units: ["Tamed Slime", "Villager"] }
-    ];
+const itemDB={"Hiranagi":{type:"mainWep",atk:1000,def:500,luck:100,icon:"🗡️",reqClass:["Swordsman","Assassin"],info:"Weapon of Gods."},"Darkness":{type:"mainWep",atk:100,def:100,spd:10,luck:20,icon:"🗡️",reqClass:["Swordsman","Assassin"],info:"Darkness engulfs foes."},"Demon Sword":{type:"mainWep",atk:30,icon:"🗡️",reqClass:["Swordsman","Assassin"],info:"Cursed sword."},"Holy Sword":{type:"mainWep",atk:150,icon:"🗡️",reqClass:["Swordsman"],info:"Hero's blade."},"Rainbow Shield":{type:"subWep",def:15,blockChance:20,icon:"🛡️",info:"Colorful defense."},"Musket":{type:"mainWep",atk:20,hasShoot:!0,icon:"🔫",reqClass:["Ranger"],info:"Ranged. Can shoot."},"Iron Axe":{type:"mainWep",atk:10,hasHeavy:!0,icon:"🪓",reqClass:["Swordsman","Fighter"],info:"Heavy but strong."},"Brawler Gloves":{type:"mainWep",atk:40,icon:"🥊",reqClass:["Fighter"],info:"Punch faces."},"Ice Staff":{type:"mainWep",matk:10,hasIce:!0,icon:"🦯",reqClass:["Mage","Supporter"],info:"Freeze enemies."},"Galaxy Sword":{type:"mainWep",atk:3000,def:300,critDmg:2,critRate:30,spd:10,luck:20,icon:"🌌",reqClass:["Swordsman","Fighter","Ranger","Supporter","Mage","Assassin"],info:"Cosmic edge."},"Iron Shield":{type:"subWep",def:10,luck:1,icon:"🛡️",info:"Solid."},"Bronze Shield":{type:"subWep",def:4,spd:2,icon:"🛡️",info:"Light."},"Wooden Sword":{type:"mainWep",atk:5,icon:"🗡️",reqClass:["Swordsman"],info:"Basic."},"Bamboo Sword":{type:"mainWep",def:5,spd:1,icon:"🗡️",reqClass:["Swordsman"],info:"Flexible."},"Royal Armor":{type:"armor",def:50,hp:500,icon:"👕",info:"Royal protection."},"Mage Hat":{type:"hat",def:10,hp:100,icon:"🎩",info:"Boosts magic."},"Four-leaf Clover":{type:"accessory",luck:100,icon:"🍀",info:"Permanent luck boost."},"Lucky Money Pouch":{type:"accessory",luck:20,doubleGold:!0,icon:"💰",info:"Doubles gold drop chances."},"Elixir":{type:"consumableSlot",icon:"🧬",info:"Auto-revive on death."},"XP Potion II":{type:"consumableSlot",icon:"🧪",info:"X2 XP 30M."},"LUCK Potion II":{type:"consumableSlot",icon:"🍀",info:"X2 LUCK 30M."}};
+const highPityPool=[{name:"Idoku (God)",icon:"👑",class:"god-relic",atk:1500,hp:7000,price:{god:1,rb:50}},{name:"Shikami (Evil God)",icon:"👑",class:"god-relic",atk:1500,hp:7000,price:{god:1,rb:50}},{name:"Kyou",icon:"👑",class:"god-relic",atk:1500,hp:7000,price:{god:1,rb:50}},{name:"Noir (Creation God)",icon:"💎",class:"ultra-relic",atk:1300,hp:6500,price:{rb:30}},{name:"God Ultra",icon:"💎",class:"ultra-relic",atk:1200,hp:6000,price:{rb:30}}];
+const slimeTypes=[{name:"Water Slime",icon:"💧",hp:150,dmg:3,debuff:null},{name:"Fire Slime",icon:"🔥",hp:300,dmg:10,debuff:"burn"},{name:"Ice Slime",icon:"❄️",hp:400,dmg:15,debuff:"freeze",duration:3},{name:"Illusion Slime",icon:"🌀",hp:400,dmg:15,debuff:"stun",duration:2},{name:"Poison Slime",icon:"☣️",hp:300,dmg:20,debuff:"poison"},{name:"KING SLIME (BOSS)",icon:"👑",hp:1500,dmg:50,debuff:"boss_rage"},{name:"Elite Slime",icon:"😈",hp:1000,dmg:35,debuff:null},{name:"Curse Slime",icon:"☠️",hp:700,dmg:20,debuff:"curse",duration:10}];
 
-    // POOL KHI PITY 101 (TỪ ULTRA RAINBOW TRỞ LÊN)
-    const highPityPool = [
-        { name: "Idoku (God)", icon: "👑", class: "god-relic", atk: 2500, hp: 12000, price: 5000 },
-        { name: "Shikami (Evil God)", icon: "👑", class: "god-relic", atk: 2500, hp: 12000, price: 5000 },
-        { name: "God Infinity - Creation", icon: "💎", class: "ultra-relic", atk: 1200, hp: 6000, price: 2000 },
-        { name: "Infinite Aura", icon: "🌌", class: "ultra-rainbow", atk: 700, hp: 3500, price: 1000 }
-    ];
-
-    const slimeTypes = [
-        { name: "Slime Xanh", icon: "💧", hp: 150, dmg: 3, debuff: null },
-        { name: "Slime Lửa", icon: "🔥", hp: 300, dmg: 10, debuff: "burn" },
-        { name: "Slime Băng", icon: "❄️", hp: 400, dmg: 15, debuff: "freeze", duration: 3 }, 
-        { name: "Slime Ảo Giác", icon: "🌀", hp: 400, dmg: 15, debuff: "stun", duration: 2 }, 
-        { name: "Slime Độc", icon: "☣️", hp: 300, dmg: 20, debuff: "poison" },
-        { name: "KING SLIME (BOSS)", icon: "👑", hp: 1500, dmg: 50, debuff: "boss_rage" }
-    ];
-
-    function addStat(type) {
-        if(player.points <= 0) return;
-        player.points--;
-        if(type === 'atk') player.baseAtk += 10;
-        if(type === 'hp') player.baseHp += 50;
-        if(type === 'def') player.baseDef += 5;
-        if(type === 'luck') player.luck += 1;
-        updateUI();
-    }
-
-    function gainXP(amt) {
-        if(player.lv >= 10000) return;
-        player.xp += amt;
-        while(player.xp >= player.nextXp && player.lv < 10000) {
-            player.lv++;
-            player.xp -= player.nextXp;
-            player.points += 5; 
-            player.nextXp = Math.floor(player.nextXp * 1.2) + (player.lv * 10);
-        }
-    }
-
-    function checkDailyLogin() {
-        const now = new Date();
-        const vnTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
-        const todayStr = vnTime.toISOString().split('T')[0];
-        if (loginData.lastClaim !== todayStr) {
-            if (loginData.streak >= 7) loginData.streak = 0;
-            showLoginModal();
-        }
-    }
-
-    function showLoginModal() {
-        document.getElementById('login-modal').style.display = 'flex';
-        const streak = loginData.streak + 1;
-        document.querySelectorAll('.day-box').forEach((box, idx) => {
-            box.classList.remove('active');
-            if (idx + 1 === streak) box.classList.add('active');
-        });
-    }
-
-    function claimLogin() {
-        loginData.streak++;
-        const s = loginData.streak;
-        let giftMsg = "";
-        if (s === 1) { wallet.rb += 20; giftMsg = "20 RBC"; }
-        else if (s === 2) { wallet.rb += 40; giftMsg = "40 RBC"; }
-        else if (s === 3) { wallet.rb += 60; giftMsg = "60 RBC"; }
-        else if (s === 4) { wallet.rb += 80; giftMsg = "80 RBC"; }
-        else if (s === 5) { wallet.rb += 100; wallet.gold += 20000; giftMsg = "100 RBC + 20,000 Gold"; }
-        else if (s === 6) { wallet.rb += 120; giftMsg = "120 RBC"; }
-        else if (s === 7) { wallet.god += 5; giftMsg = "5 GOD COIN"; }
-        const now = new Date();
-        const vnTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
-        loginData.lastClaim = vnTime.toISOString().split('T')[0];
-        alert("Bạn đã nhận thưởng ngày " + s + ": " + giftMsg);
-        document.getElementById('login-modal').style.display = 'none';
-        updateUI();
-        saveGame(true);
-    }
-
-    function setAvatar(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                customAvatar = event.target.result;
-                renderAvatar();
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
-    function renderAvatar() {
-        const holder = document.getElementById('av-img-holder');
-        if (customAvatar) {
-            holder.innerHTML = `<img src="${customAvatar}" alt="avatar">`;
-        } else {
-            holder.innerHTML = `<span id="av-text" style="font-size: 40px;">👤</span>`;
-        }
-    }
-
-    function saveGame(silent) {
-        const gameData = { wallet, player, inventory, pity, mobCount: mob.count, playerName, customAvatar, usedCodes, loginData };
-        localStorage.setItem('adv_endless_v3_0', JSON.stringify(gameData));
-        if(!silent) alert(lang[currentLang].saved);
-    }
-
-    function loadGame() {
-        const data = localStorage.getItem('adv_endless_v3_0');
-        if(!data) return alert(lang[currentLang].noSave);
-        const parsed = JSON.parse(data);
-        wallet = parsed.wallet;
-        player = parsed.player;
-        inventory = parsed.inventory;
-        pity = parsed.pity;
-        usedCodes = parsed.usedCodes || [];
-        mob.count = parsed.mobCount || 0;
-        playerName = parsed.playerName || playerName;
-        customAvatar = parsed.customAvatar || null;
-        loginData = parsed.loginData || { lastClaim: null, streak: 0 };
-        document.getElementById('display-name').innerText = playerName; 
-        document.getElementById('display-class').innerText = player.class;
-        renderAvatar();
-        goTo('lobby');
-        alert(lang[currentLang].welcome);
-        checkDailyLogin();
-    }
-
-    function toggleLang() {
-        currentLang = currentLang === 'vi' ? 'en' : 'vi';
-        const t = lang[currentLang];
-        document.querySelectorAll('[data-t]').forEach(el => {
-            const key = el.getAttribute('data-t');
-            if (t[key]) el.innerText = t[key];
-        });
-        document.getElementById('giftcode-input').placeholder = t.codePh;
-        updateUI();
-        if(document.getElementById('p-summon').classList.contains('active-flex')) renderRarityTable();
-    }
-
-    function changeName() { 
-        let n = prompt(lang[currentLang].askName, playerName); 
-        if(n && n.trim() !== "") {
-            playerName = n.trim().toUpperCase();
-            document.getElementById('display-name').innerText = playerName;
-        }
-    }
-
-    function startBattle() { 
-        if(battleTimer) return; 
-        battleTimer = setInterval(() => { 
-            let mobData = slimeTypes[mob.type];
-            let actualDmg = mobData.dmg;
-            if(mob.type === 5 && mob.hp < (mob.maxHp * 0.5)) actualDmg *= 2; 
-            if(player.burnTicks > 0) { player.curHp -= 5; player.burnTicks--; }
-            if(player.burnTicks === 0) document.getElementById('main-container').classList.remove('burn-effect');
-            if(player.freezeTicks > 0) player.freezeTicks--;
-            if(player.freezeTicks === 0) document.getElementById('main-container').classList.remove('freeze-effect');
-            if(player.stunTicks > 0) player.stunTicks--;
-            if(player.stunTicks === 0) document.getElementById('main-container').classList.remove('stun-effect');
-            if(debuffCooldown > 0) debuffCooldown--;
-            player.curHp -= actualDmg;
-            if (debuffCooldown === 0) {
-                if(mobData.debuff === "burn") { player.burnTicks = 3; document.getElementById('main-container').classList.add('burn-effect'); debuffCooldown = 5; }
-                else if(mobData.debuff === "freeze" && player.freezeTicks <= 0) { player.freezeTicks = 3; document.getElementById('main-container').classList.add('freeze-effect'); debuffCooldown = 5; }
-                else if(mobData.debuff === "stun" && player.stunTicks <= 0) { player.stunTicks = 2; document.getElementById('main-container').classList.add('stun-effect'); debuffCooldown = 5; }
-            }
-            if(player.curHp <= 0) { alert(lang[currentLang].fail); goTo('lobby'); } 
-            updateUI(); 
-        }, 1000); 
-    }
-
-    function stopBattle() { 
-        clearInterval(battleTimer); 
-        battleTimer = null; 
-        player.burnTicks = 0; 
-        player.freezeTicks = 0; 
-        player.stunTicks = 0;
-        debuffCooldown = 0;
-        document.getElementById('main-container').classList.remove('burn-effect', 'freeze-effect', 'stun-effect');
-        let bHp = player.equippedIdx !== null ? inventory[player.equippedIdx].hp : 0; 
-        player.curHp = player.baseHp + bHp; 
-    }
-
-    function updateUI() {
-        let bAtk = player.equippedIdx !== null ? inventory[player.equippedIdx].atk : 0;
-        let bHp = player.equippedIdx !== null ? inventory[player.equippedIdx].hp : 0;
-        document.getElementById('v-rb').innerText = Math.floor(wallet.rb);
-        document.getElementById('v-gold').innerText = Math.floor(wallet.gold).toLocaleString();
-        document.getElementById('v-godc').innerText = Math.floor(wallet.god);
-        document.getElementById('v-chest').innerText = wallet.chest;
-        document.getElementById('v-key').innerText = wallet.key;
-        document.getElementById('v-lv').innerText = player.lv;
-        document.getElementById('st-atk').innerText = (player.class === "Kiếm Sĩ" ? 50 : player.baseAtk) + bAtk;
-        document.getElementById('st-hp').innerText = player.baseHp + bHp;
-        document.getElementById('st-def').innerText = player.baseDef;
-        document.getElementById('st-luck').innerText = player.luck;
-        document.getElementById('cur-p-hp').innerText = Math.floor(player.curHp);
-        document.getElementById('display-name').innerText = playerName;
-        
-        document.getElementById('v-points').innerText = player.points;
-        const pAlert = document.getElementById('points-alert');
-        const addBtns = document.querySelectorAll('.add-btn');
-        if(player.points > 0) {
-            pAlert.style.display = 'block';
-            addBtns.forEach(b => b.style.display = 'flex');
-        } else {
-            pAlert.style.display = 'none';
-            addBtns.forEach(b => b.style.display = 'none');
-        }
-
-        let status = "";
-        if(player.burnTicks > 0) status += " 🔥[" + player.burnTicks + "s]";
-        if(player.freezeTicks > 0) status += " ❄️[" + player.freezeTicks + "s]";
-        if(player.stunTicks > 0) status += " 😵[" + player.stunTicks + "s]";
-        if(debuffCooldown > 0 && player.stunTicks === 0 && player.freezeTicks === 0) status += " 🛡️CD[" + debuffCooldown + "s]";
-        if(mob.type === 5 && mob.hp < (mob.maxHp * 0.5)) status += " ⚔️↑[RAGE]";
-        document.getElementById('status-tag').innerText = status;
-        document.getElementById('pity-count').innerText = (pity > 100) ? "100/100" : pity;
-        document.getElementById('p-hp-fill').style.width = (player.curHp / (player.baseHp + bHp) * 100) + "%";
-        document.getElementById('mob-hp-val').innerText = `${Math.max(0, Math.floor(mob.hp))} / ${mob.maxHp}`;
-        document.getElementById('hp-fill').style.width = (mob.hp / mob.maxHp * 100) + "%";
-        document.getElementById('xp-bar').style.width = (player.xp / player.nextXp * 100) + "%";
-        const invGrid = document.getElementById('inv-grid');
-        invGrid.innerHTML = '';
-        inventory.forEach((item, index) => {
-            const div = document.createElement('div');
-            div.className = `inv-item ${item.rarityClass} ${player.equippedIdx === index ? 'equipped' : ''}`;
-            div.onclick = () => toggleEquip(index);
-            div.innerHTML = `${item.icon}<div class="inv-item-name">${item.name}</div><button class="sell-btn" onclick="event.stopPropagation(); sellUnit(${index})">${lang[currentLang].sell}</button>`;
-            invGrid.appendChild(div);
-        });
-        const isCC = (player.stunTicks > 0 || player.freezeTicks > 0);
-        document.getElementById('normal-hit-btn').disabled = isCC;
-        const skillBtn = document.getElementById('main-skill-btn');
-        if(skillBtn) {
-            skillBtn.disabled = (isCC || skillCooldown > 0);
-            if (skillCooldown <= 0) skillBtn.innerText = lang[currentLang].skillName + " (50 DMG)";
-        }
-        document.getElementById('skill-box').style.display = (player.class === "Kiếm Sĩ") ? "block" : "none";
-    }
-
-    // CẬP NHẬT MỞ RƯƠNG NHẬN TRỰC TIẾP
-    function openChest(times) {
-        if(wallet.chest < times || wallet.key < times) return alert(lang[currentLang].chestReq);
-        let totalGold = 0; let totalRb = 0; let totalGod = 0;
-        for(let i=0; i<times; i++) {
-            wallet.chest--; wallet.key--;
-            let r = Math.random() * 100;
-            if (r < 10) { totalRb += Math.floor(Math.random() * 15) + 5; }
-            else if (r < 11) { totalGod += 1; }
-            else if (r < 40) { totalGold += Math.floor(Math.random() * 15001) + 5000; }
-        }
-        wallet.rb += totalRb; wallet.gold += totalGold; wallet.god += totalGod;
-        
-        let msg = `BẠN ĐÃ MỞ ${times} RƯƠNG:`;
-        if(totalGold > 0) msg += `\n- Gold: +${totalGold.toLocaleString()}`;
-        if(totalRb > 0) msg += `\n- RBC: +${totalRb}`;
-        if(totalGod > 0) msg += `\n- God Coin: +${totalGod}`;
-        if(totalGold === 0 && totalRb === 0 && totalGod === 0) msg += `\n- ${lang[currentLang].chestEmpty}`;
-        
-        alert(msg);
-        updateUI();
-    }
-
-    function useCode() {
-        let code = document.getElementById('giftcode-input').value.trim().toUpperCase();
-        if(code === "") return;
-        if(usedCodes.includes(code)) { alert(lang[currentLang].codeUsed); return; }
-        if(code === "DEMO") {
-            wallet.rb += 500; wallet.gold += 2000000; wallet.chest += 5; wallet.key += 5;
-            usedCodes.push(code); alert(lang[currentLang].codeDemo + " (+500 RBC, +2M Gold, +5 Chest/Key)");
-        } else { alert(lang[currentLang].codeInvalid); }
-        document.getElementById('giftcode-input').value = "";
-        updateUI();
-    }
-
-    function hitSlime() {
-        if(player.stunTicks > 0 || player.freezeTicks > 0) return;
-        let bAtk = player.equippedIdx !== null ? inventory[player.equippedIdx].atk : 0;
-        let isCrit = (Math.random() * 100 < (player.luck * 0.5));
-        let dmg = (player.class === "Kiếm Sĩ") ? 50 + bAtk : player.baseAtk + bAtk; 
-        if(isCrit) dmg = Math.floor(dmg * 2.5);
-
-        mob.hp -= dmg;
-        document.getElementById('battle-log').innerText = (isCrit ? "CRIT! " : "") + lang[currentLang].logHit + dmg;
-        if (mob.hp <= 0) { 
-            mob.count++; gainXP(40); 
-            if(Math.random() < (0.25 + (player.luck * 0.01))) { wallet.chest++; }
-            if(Math.random() < (0.25 + (player.luck * 0.01))) { wallet.key++; }
-            spawnNewMob(); 
-        }
-        updateUI();
-    }
-
-    function nhatKiemTram() {
-        if(player.stunTicks > 0 || player.freezeTicks > 0 || skillCooldown > 0) return;
-        const vfx = document.getElementById('vfx-slash');
-        vfx.classList.remove('slash-anim');
-        void vfx.offsetWidth; vfx.classList.add('slash-anim');
-        let bAtk = player.equippedIdx !== null ? inventory[player.equippedIdx].atk : 0;
-        let finalDmg = 50 + bAtk; 
-        mob.hp -= finalDmg;
-        document.getElementById('battle-log').innerText = "KỸ NĂNG: -" + finalDmg;
-        skillCooldown = 6;
-        let btn = document.getElementById('main-skill-btn');
-        btn.disabled = true;
-        let countdown = setInterval(() => {
-            skillCooldown--;
-            if (skillCooldown <= 0) {
-                clearInterval(countdown);
-                btn.innerText = lang[currentLang].skillName + " (50 DMG)";
-                btn.disabled = (player.stunTicks > 0 || player.freezeTicks > 0);
-            } else { btn.innerText = `${lang[currentLang].skillCd} (${skillCooldown}s)`; }
-        }, 1000);
-        if (mob.hp <= 0) { mob.count++; gainXP(40); spawnNewMob(); }
-        updateUI();
-    }
-
-    function spawnNewMob() {
-        mob.type = (mob.count % 10 === 0 && mob.count !== 0) ? 5 : Math.floor(Math.random() * 5);
-        mob.maxHp = slimeTypes[mob.type].hp + (player.lv * 50);
-        mob.hp = mob.maxHp;
-        document.getElementById('mob-name').innerText = slimeTypes[mob.type].name;
-        document.getElementById('slime-mob').innerText = slimeTypes[mob.type].icon;
-    }
-
-    function goTo(p) {
-        document.getElementById('ui-game').style.display = 'flex';
-        document.getElementById('p-menu').classList.remove('active-flex');
-        document.querySelectorAll('.content-area .page').forEach(pg => pg.classList.remove('active-flex'));
-        document.getElementById('p-' + p).classList.add('active-flex');
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
-        const nav = document.getElementById('nav-' + p); if(nav) nav.classList.add('nav-active');
-        if(p === 'adventure') startBattle(); else stopBattle();
-        if(p === 'summon') renderRarityTable();
-        updateUI();
-    }
-
-    function backToMenu() { stopBattle(); document.getElementById('ui-game').style.display = 'none'; document.getElementById('p-menu').classList.add('active-flex'); }
-    function openClassSelect() { document.getElementById('p-menu').classList.remove('active-flex'); document.getElementById('p-class-select').classList.add('active-flex'); }
-    function selectClass(c, i) { player.class = c; document.getElementById('display-class').innerText = c; document.getElementById('p-class-select').classList.remove('active-flex'); goTo('lobby'); }
-    function toggleEquip(idx) { player.equippedIdx = (player.equippedIdx === idx) ? null : idx; updateUI(); }
-    function sellUnit(idx) { if(player.equippedIdx === idx) player.equippedIdx = null; wallet.gold += inventory[idx].price; inventory.splice(idx, 1); updateUI(); }
-
-    // CẬP NHẬT LOGIC PITY 100 + 1
-    function pull(times, currency) {
-        if(currency === 'rb') {
-            let cost = times === 1 ? 100 : 1000;
-            if(wallet.rb < cost) return alert("Không đủ RBC!");
-            wallet.rb -= cost;
-        } else if(currency === 'gold') {
-            if(wallet.gold < 2000000) return alert("Không đủ GOLD! (Cần 2,000,000 cho x10)");
-            wallet.gold -= 2000000;
-        } else if(currency === 'god') {
-            if(wallet.god < 1) return alert("Không đủ GOD COIN!");
-            wallet.god -= 1;
-        }
-        const resDiv = document.getElementById('results');
-        resDiv.innerHTML = '';
-        for (let i = 0; i < times; i++) {
-            pity++; 
-            let resUnit;
-            // KHI PITY ĐẠT 101 (TỨC LÀ LƯỢT TIẾP THEO SAU 100)
-            if (pity > 100) {
-                let picked = highPityPool[Math.floor(Math.random() * highPityPool.length)];
-                resUnit = { name: picked.name, icon: picked.icon, rarityClass: picked.class, atk: picked.atk, hp: picked.hp, price: picked.price };
-                pity = 0; // RESET VỀ 0
-            } else {
-                let r = Math.random() * 100;
-                let rarityRes = rates.find(x => r <= x.rate);
-                resUnit = { name: rarityRes.units[Math.floor(Math.random() * rarityRes.units.length)], icon: rarityRes.icon, rarityClass: rarityRes.class, atk: rarityRes.atk, hp: rarityRes.hp, price: rarityRes.price };
-            }
-            inventory.push(resUnit);
-            resDiv.innerHTML += `<div class="item ${resUnit.rarityClass}">${resUnit.icon}<br>${resUnit.name}</div>`;
-        }
-        updateUI();
-    }
-
-    function renderRarityTable() {
-        const table = document.getElementById('r-table');
-        if(!table) return;
-        table.innerHTML = `<div style="color:var(--cyan); font-weight:bold; margin-bottom:5px;">${lang[currentLang].rarityTitle}</div>`;
-        let lastLimit = 0;
-        rates.forEach(r => {
-            let chance = r.rate - lastLimit;
-            table.innerHTML += `<div class="rarity-row"><span class="${r.class}">${r.icon} ${r.name}</span><span>${chance.toFixed(2)}%</span></div>`;
-            lastLimit = r.rate;
-        });
-    }
-    
-    window.onload = () => {
-        updateUI();
-        checkDailyLogin();
-    };
-</script>
-</body>
-</html>
+function showMsg(txt,cb=null){document.getElementById('msg-text').innerText=txt;document.getElementById('msg-modal').style.display='flex';msgCallback=cb;}
+function closeMsg(){document.getElementById('msg-modal').style.display='none';if(msgCallback)msgCallback();msgCallback=null;}
+function startNewGame() {if(confirm("Start a NEW GAME? This will erase current unsaved progress!")){wallet={gold:0,rb:0,god:0,chest:0,key:0,pLuck:0,pXp:0,soulStone:0,stones:{1:0,2:0,3:0,4:0,5:0}};player={lv:1,xp:0,nextXp:100,points:0,luck:1,baseAtk:10,baseMatk:10,baseDef:10,baseHp:100,baseSpd:10,curHp:100,maxMana:100,curMana:100,equippedUnitUid:null,class:"",burnTicks:0,freezeTicks:0,stunTicks:0,curseTicks:0,luckBuff:0,xpBuff:0,luckBuffTier:0,xpBuffTier:0,maxInv:20,critChance:10,perfectCrit:2,revivesLeft:0,recoveryTicks:0,bloodTicks:0,tutorialDone:!1,isVip:!1};equipment={hat:null,armor:null,pants:null,shoes:null,gloves:null,mainWep:null,subWep:null,accessory:null,consumableSlot:null};inventory=[];mailbox=[];usedCodes=[];pity=0;wpity=0;globalMobCount=0;openClassSelect();}}
+function getMaxHp() {let eU=inventory.find(i=>i.uid===player.equippedUnitUid),bH=eU?eU.hp||0:0;if(eU&&eU.name==="Kyou") bH+=7500;Object.values(equipment).forEach(i=>{if(i&&i.hp&&(!i.maxDurability||i.durability>0))bH+=i.hp;});return player.baseHp+bH;}
+function addStat(type){if(player.points<=0)return;player.points-=1;if(type==='atk')player.baseAtk+=1;if(type==='matk')player.baseMatk+=1;if(type==='def')player.baseDef+=1;if(type==='luck')player.luck+=1;if(type==='spd')player.baseSpd=Math.min(50,player.baseSpd+1);if(type==='hp'){player.baseHp+=50;player.curHp+=50;}updateUI();}
+function gainXP(amt){if(player.lv>=10000)return;if(player.xpBuff>0)amt*=2;player.xp+=amt;while(player.xp>=player.nextXp&&player.lv<10000){player.lv++;player.xp-=player.nextXp;player.points+=5;player.nextXp=Math.floor(player.nextXp*1.2)+(player.lv*10);}}
+function buyItem(type){if(type==='haura'){if((wallet.soulStone||0)<1)return showMsg("Not enough Soul Stones!");wallet.soulStone--;let maxD=durMap["ultra-rainbow"]||1000;inventory.push({uid:Math.random().toString(36).substr(2,9),name:"Galaxy Sword",icon:"🌌",rarityClass:"ultra-rainbow",itemType:"mainWep",durability:maxD,maxDurability:maxD,...itemDB["Galaxy Sword"]});showMsg("Purchase successful!");}else if(type==='elixir'){if(wallet.rb>=300)wallet.rb-=300;else if(wallet.god>=2)wallet.god-=2;else return showMsg("Not enough currency!");inventory.push({uid:Math.random().toString(36).substr(2,9),name:"Elixir",icon:"🧬",rarityClass:"heroic",itemType:"consumableSlot",price:{rb:100},info:itemDB["Elixir"].info});showMsg("Purchased!");}else{if(wallet.gold<(type.includes('2')?300000:100000))return showMsg("Not enough Gold!");wallet.gold-=(type.includes('2')?300000:100000);if(type==='xp')wallet.pXp++;if(type==='luck')wallet.pLuck++;if(type==='xp2')inventory.push({uid:Math.random().toString(36).substr(2,9),name:"XP Potion II",icon:"🧪",rarityClass:"epic",itemType:"consumableSlot",price:{gold:150000},info:itemDB["XP Potion II"].info});if(type==='luck2')inventory.push({uid:Math.random().toString(36).substr(2,9),name:"LUCK Potion II",icon:"🍀",rarityClass:"epic",itemType:"consumableSlot",price:{gold:150000},info:itemDB["LUCK Potion II"].info});showMsg("Purchased!");}updateUI();}
+function buyStones(tier){let q=prompt("How many Tier "+tier+" Stones to buy?","1");q=parseInt(q);if(isNaN(q)||q<=0)return;let c=0,cur='gold';if(tier===1)c=10000;else if(tier===2)c=20000;else if(tier===3)c=50000;else if(tier===4){c=1;cur='rb';}else if(tier===5){c=1;cur='god';}let t=c*q;if(cur==='gold'&&wallet.gold>=t){wallet.gold-=t;wallet.stones[tier]+=q;showMsg(`Bought ${q} Stone(s)!`);}else if(cur==='rb'&&wallet.rb>=t){wallet.rb-=t;wallet.stones[tier]+=q;showMsg(`Bought ${q} Stone(s)!`);}else if(cur==='god'&&wallet.god>=t){wallet.god-=t;wallet.stones[tier]+=q;showMsg(`Bought ${q} Stone(s)!`);}else showMsg(`Not enough ${cur==='gold'?"Gold":cur.toUpperCase()}!`);updateUI();}
+function usePotion(type){if(type==='luck'&&wallet.pLuck>0){if(player.luckBuff>0 && player.luckBuffTier!==1)return showMsg("Different tier Luck potion active!"); wallet.pLuck--;player.luckBuff+=600;player.luckBuffTier=1;showMsg("Drank Luck Potion!");}else if(type==='xp'&&wallet.pXp>0){if(player.xpBuff>0 && player.xpBuffTier!==1)return showMsg("Different tier XP potion active!"); wallet.pXp--;player.xpBuff+=600;player.xpBuffTier=1;showMsg("Drank X2 XP Potion!");}updateUI();}
+function exploreAround(){let m=document.getElementById('explore-msg');m.innerHTML=`<b>Exploring...</b>`;m.style.display='block';setTimeout(()=>{m.style.display='none';if(Math.random()<=0.4){miniSlimeHp=100;document.getElementById('mini-slime-hp').innerText=miniSlimeHp;document.getElementById('mini-battle-modal').style.display='flex';}else{let r2=Math.random(),txt="Exploration done! ";if(r2<=0.8){txt+="Found nothing...";}else{let r3=Math.random();if(r3<=0.01){wallet.god++;txt+="1 GOD COIN!";}else if(r3<=0.1){wallet.rb++;txt+="1 RBC!";}else if(r3<=0.3){wallet.pLuck++;txt+="1 Luck Potion!";}else if(r3<=0.6){wallet.chest++;txt+="1 Chest!";}else{wallet.key++;wallet.gold+=10000;txt+=`1 Key & Gold!`;}}showMsg(txt);updateUI();}},2000);}
+function hitMiniSlime(){let atk=player.baseAtk;Object.values(equipment).forEach(i=>{if(i&&i.atk)atk+=i.atk;});miniSlimeHp-=atk;if(miniSlimeHp<=0){document.getElementById('mini-battle-modal').style.display='none';let a=Math.floor(Math.random()*5)+1;if(Math.random()<=0.6){wallet.stones[1]+=a;showMsg(`Killed Wild Slime! Got ${a} Tier I Stone(s)!`);}else{wallet.stones[2]+=a;showMsg(`Killed Wild Slime! Got ${a} Tier II Stone(s)!`);}updateUI();}else document.getElementById('mini-slime-hp').innerText=miniSlimeHp;}
+function checkDailyLogin(){const now=new Date(),vnTime=new Date(now.getTime()+(7*3600000)),todayStr=vnTime.toISOString().split('T')[0];if(loginData.lastClaim!==todayStr){if(loginData.streak>=7)loginData.streak=0;document.getElementById('login-modal').style.display='flex';const streak=loginData.streak+1;document.querySelectorAll('.day-box').forEach((b,i)=>{b.classList.remove('active');if(i+1===streak)b.classList.add('active');});}}
+function claimLogin(){loginData.streak++;const s=loginData.streak;let gM="";if(s===1){wallet.rb+=20;gM="20 RBC";}else if(s===2){wallet.rb+=40;gM="40 RBC";}else if(s===3){wallet.rb+=60;gM="60 RBC";}else if(s===4){wallet.rb+=80;gM="80 RBC";}else if(s===5){wallet.rb+=100;wallet.gold+=20000;gM="100 RBC+20k G";}else if(s===6){wallet.rb+=120;gM="120 RBC";}else if(s===7){wallet.god+=5;gM="5 GOD";}loginData.lastClaim=new Date(Date.now()+25200000).toISOString().split('T')[0];showMsg("Claimed: "+gM);document.getElementById('login-modal').style.display='none';updateUI();saveGame(lastSaveSlot,!0);}
+function setAvatar(e){const f=e.target.files[0];if(f){const r=new FileReader();r.onload=e=>{customAvatar=e.target.result;renderAvatar();};r.readAsDataURL(f);}}function renderAvatar(){document.getElementById('av-img-holder').innerHTML=customAvatar?`<img src="${customAvatar}" alt="av">`:`<span style="font-size:50px;">👤</span>`;}
+function saveGame(s,silent){localStorage.setItem('adv_endless_slot_'+s,JSON.stringify({wallet,player,inventory,pity,wpity,globalMobCount,playerName,customAvatar,usedCodes,loginData,equipment,mailbox}));if(s!=='auto')lastSaveSlot=s;updateSlotNames();if(!silent)showMsg("Saved Slot "+s);}
+function loadGame(s){const d=localStorage.getItem('adv_endless_slot_'+s);if(!d)return showMsg("No save file Slot "+s);const p=JSON.parse(d);wallet=p.wallet;if(!wallet.stones)wallet.stones={1:0,2:0,3:0,4:0,5:0};player={...player,...p.player};inventory=p.inventory||[];mailbox=p.mailbox||[];pity=p.pity;wpity=p.wpity||0;equipment=p.equipment||{hat:null,armor:null,pants:null,shoes:null,gloves:null,mainWep:null,subWep:null,accessory:null,consumableSlot:null};usedCodes=p.usedCodes||[];globalMobCount=p.globalMobCount||0;playerName=p.playerName||playerName;customAvatar=p.customAvatar||null;loginData=p.loginData||{lastClaim:null,streak:0};inventory.forEach(i=>{if(!i.uid)i.uid=Math.random().toString(36).substr(2,9);});if(s!=='auto')lastSaveSlot=s;player.curHp=getMaxHp();updateUI();renderAvatar();goTo('lobby');showMsg("Welcome back!");}
+function deleteSave(s){if(confirm("Delete Slot "+s+"?")){localStorage.removeItem('adv_endless_slot_'+s);updateSlotNames();showMsg("Deleted Slot "+s);}}
+function updateSlotNames(){const a=localStorage.getItem('adv_endless_slot_auto');document.getElementById('name-sauto').innerText=a?`Auto: ${JSON.parse(a).playerName} (Lv${JSON.parse(a).player.lv})`:`Auto-Save: Empty`;for(let i=1;i<=3;i++){const d=localStorage.getItem('adv_endless_slot_'+i);document.getElementById('name-s'+i).innerText=d?`Slot ${i}: ${JSON.parse(d).playerName} (Lv${JSON.parse(d).player.lv})`:`Slot ${i}: Empty`;}}
+setInterval(()=>{if(player.luckBuff>0){player.luckBuff--;if(player.luckBuff===0)player.luckBuffTier=0;}if(player.xpBuff>0){player.xpBuff--;if(player.xpBuff===0)player.xpBuffTier=0;}updateUI();},1000);
+function changeName(){let n=prompt("New name:",playerName);if(n&&n.trim()!==""){playerName=n.trim().toUpperCase();updateUI();}}
+function setTarget(i){if(activeMobs[i]&&activeMobs[i].hp>0){targetIndex=i;renderActiveMobs();}}
+function fleeBoss(){stopBattle();activeMobs=[];goTo('lobby');showMsg("Retreated!");}
+function startWorldBoss(){document.getElementById('flee-boss-btn').style.display='block';activeMobs=[{type:'giant',name:"GIANT SLIME (WORLD BOSS)",maxHp:2e6,hp:2e6,dmg:2500,burnTicks:0,stunTicks:0,icon:"🟢",isBoss:!0,isWorldBoss:!0}];targetIndex=0;document.getElementById('wave-display').innerText="WORLD BOSS - GIANT SLIME";goTo('adventure');}
+function showDeathScreen(){document.getElementById('death-modal').style.display='flex';let hE=equipment.consumableSlot?.name==="Elixir"||inventory.some(i=>i.name==="Elixir");document.getElementById('btn-revive').style.display=hE?'block':'none';}
+function respawn(){document.getElementById('death-modal').style.display='none';player.curHp=getMaxHp();goTo('lobby');}
+function useElixirRevive(){if(equipment.consumableSlot?.name==="Elixir")equipment.consumableSlot=null;else{let x=inventory.findIndex(i=>i.name==="Elixir");if(x>-1)inventory.splice(x,1);}document.getElementById('death-modal').style.display='none';player.curHp=getMaxHp();player.recoveryTicks+=30;document.getElementById('battle-log').innerHTML=`<span style="color:#00ff66;">REVIVED! RECOVERY II!</span>`;startBattle();}
+function startBattle(){if(!activeMobs||activeMobs.length===0)spawnNewMob();if(!autoSaveTimer)autoSaveTimer=setInterval(()=>saveGame('auto',!0),1e4);if(battleTimer)return;
+battleTimer=setInterval(()=>{if(player.class==="Mage"&&player.curMana<player.maxMana)player.curMana=Math.min(player.maxMana,player.curMana+5);let tSpd=player.baseSpd;Object.values(equipment).forEach(i=>{if(i&&i.spd)tSpd+=i.spd;});let dC=Math.min(50,tSpd);if(player.curseTicks>0)dC-=40;if(dC<0)dC=0;let bC=equipment.subWep&&equipment.subWep.blockChance?equipment.subWep.blockChance:0;let newSp=[];if(player.recoveryTicks>0){player.curHp+=300;player.recoveryTicks--;if(player.curHp>player.baseHp*10)player.curHp=player.baseHp*10;}if(player.bloodTicks>0){player.curHp-=20;player.bloodTicks--;}
+activeMobs.forEach(m=>{if(m.hp<=0)return;if(m.type==='queen'&&m.hp<=m.maxHp*.5&&!m.enraged){m.enraged=!0;m.resLevel=2;m.recLevel=2;player.curHp-=40;player.bloodTicks=10;document.getElementById('battle-log').innerHTML=`<span style="color:red;">QUEEN ENRAGED!</span>`;}if(m.recLevel>0)m.hp+=m.recLevel*100;if(m.burnTicks>0){m.hp-=m.burnDmg||40;m.burnTicks--;}if(m.stunTicks>0)m.stunTicks--;if(m.hp<=0||m.stunTicks>0)return;let aD=m.dmg;if(Math.random()*100<dC)return document.getElementById('battle-log').innerText="DODGED!";if(Math.random()*100<bC)return document.getElementById('battle-log').innerText="BLOCKED!";if(m.type===5||m.type==='queen'){if(m.hp<m.maxHp*.5)aD*=2;if(Math.random()<.4&&(activeMobs.length+newSp.length)<3&&!m.isWorldBoss){let sL=3-(activeMobs.length+newSp.length),sC=Math.min(Math.floor(Math.random()*2)+1,sL);for(let s=0;s<sC;s++){let sD=slimeTypes[Math.floor(Math.random()*5)];newSp.push({type:Math.floor(Math.random()*5),maxHp:sD.hp+(player.lv*50),hp:sD.hp+(player.lv*50),dmg:sD.dmg,burnTicks:0,stunTicks:0});}}}player.curHp-=aD;let mD=slimeTypes[m.type];if(debuffCooldown===0&&mD&&mD.debuff){if(mD.debuff==="burn"){player.burnTicks=3;document.getElementById('main-container').classList.add('burn-effect');debuffCooldown=5;}else if(mD.debuff==="freeze"&&player.freezeTicks<=0){player.freezeTicks=3;document.getElementById('main-container').classList.add('freeze-effect');debuffCooldown=5;}else if(mD.debuff==="stun"&&player.stunTicks<=0){player.stunTicks=2;document.getElementById('main-container').classList.add('stun-effect');debuffCooldown=5;}else if(mD.debuff==="curse"&&player.curseTicks<=0){player.curseTicks=mD.duration;document.getElementById('main-container').classList.add('curse-effect');debuffCooldown=5;}}});
+if(newSp.length>0)activeMobs=activeMobs.concat(newSp);renderActiveMobs();if(player.burnTicks>0){player.curHp-=5;player.burnTicks--;}if(player.burnTicks===0)document.getElementById('main-container').classList.remove('burn-effect');if(player.freezeTicks>0)player.freezeTicks--;if(player.freezeTicks===0)document.getElementById('main-container').classList.remove('freeze-effect');if(player.stunTicks>0)player.stunTicks--;if(player.stunTicks===0)document.getElementById('main-container').classList.remove('stun-effect');if(player.curseTicks>0)player.curseTicks--;if(player.curseTicks===0)document.getElementById('main-container').classList.remove('curse-effect');if(debuffCooldown>0)debuffCooldown--;if(heavyCooldown>0)heavyCooldown--;if(skillCooldown>0)skillCooldown--;if(player.curHp<=0){stopBattle();showDeathScreen();}else updateUI();},1000);}
+function stopBattle(){clearInterval(battleTimer);battleTimer=null;clearInterval(autoSaveTimer);autoSaveTimer=null;player.burnTicks=0;player.freezeTicks=0;player.stunTicks=0;player.curseTicks=0;debuffCooldown=0;document.getElementById('main-container').classList.remove('burn-effect','freeze-effect','stun-effect','curse-effect');updateUI();}
+function expandInventory(){if(player.maxInv>=500)return showMsg("Max (500 Slots)!");if(wallet.god>=1){if(confirm(`1 GOD COIN = 20 slots?\n(${player.maxInv} -> ${Math.min(500,player.maxInv+20)})`)){wallet.god--;player.maxInv=Math.min(500,player.maxInv+20);updateUI();}}else showMsg("Not enough GOD COIN!");}
+function isItemEquipped(i){if(!i.uid)return!1;if(i.itemType)return equipment[i.itemType]&&equipment[i.itemType].uid===i.uid;return player.equippedUnitUid===i.uid;}
+function getPriceText(p){if(typeof p==='number')return p+"G";let r=[];if(p.god)r.push(p.god+"GOD");if(p.rb)r.push(p.rb+"RBC");if(p.gold)r.push(p.gold+"G");return r.join(" ");}
+function setInvFilter(t){currentInvFilter=t;document.querySelectorAll('.inv-tab').forEach(e=>e.classList.remove('active'));document.getElementById('tab-'+(t==='consumable'?'consum':t)).classList.add('active');updateUI();}
+function showItemInfo(i){viewingItem=i;let t=`Name: <b class="${i.rarityClass}">${i.name}</b><br>Type: ${i.itemType?"Gear/Item":"Unit"}<br>`;if(i.atk)t+=`ATK: ${i.atk}<br>`;if(i.matk)t+=`MATK: ${i.matk}<br>`;if(i.hp)t+=`HP: ${i.hp}<br>`;if(i.def)t+=`DEF: ${i.def}<br>`;if(i.spd)t+=`SPD: ${i.spd}<br>`;if(i.luck)t+=`LUCK: ${i.luck}<br>`;if(i.critChance)t+=`CRIT: ${i.critChance}%<br>`;if(i.critDmg)t+=`C.DMG: x${i.critDmg}<br>`;if(i.maxDurability)t+=`Durability: ${i.durability}/${i.maxDurability}<br>`;if(i.reqClass)t+=`Req: ${i.reqClass.join(', ')}<br>`;if(i.info)t+=`<br><i>${i.info}</i>`;document.getElementById('item-info-content').innerHTML=t;document.getElementById('item-info-modal').style.display='flex';if(i.maxDurability&&i.durability<i.maxDurability)document.getElementById('repair-btn').style.display='block';else document.getElementById('repair-btn').style.display='none';}
+function closeItemInfo(){document.getElementById('item-info-modal').style.display='none';viewingItem=null;}
+function repairItem(){if(!viewingItem||!viewingItem.maxDurability)return;let reqTier=stoneMap[viewingItem.rarityClass.replace(' ','')]||1;let missing=viewingItem.maxDurability-viewingItem.durability;let cost=Math.max(1,Math.ceil(missing/50));if(wallet.stones[reqTier]>=cost){wallet.stones[reqTier]-=cost;viewingItem.durability=viewingItem.maxDurability;showMsg(`Repaired for ${cost} Tier ${reqTier} Stone(s)!`);closeItemInfo();updateUI();}else{showMsg(`Not enough Tier ${reqTier} Stones! Need ${cost}.`);}}
+function updateUI(){let eU=inventory.find(i=>i.uid===player.equippedUnitUid),bA=eU?eU.atk||0:0,bMa=eU?eU.matk||0:0,bD=eU?eU.def||0:0,bS=0,bL=0;if(eU&&eU.name==="Kyou"){bMa+=999;player.maxMana=1200;document.getElementById('mana-container').style.display='block';bL+=30;}else if(player.class!=="Mage")document.getElementById('mana-container').style.display='none';Object.values(equipment).forEach(i=>{if(i){if(i.maxDurability&&i.durability<=0)return;if(i.atk)bA+=i.atk;if(i.def)bD+=i.def;if(i.spd)bS+=i.spd;if(i.luck)bL+=i.luck;if(i.matk)bMa+=i.matk;}});let cA=(player.class==="Swordsman")?50:(player.class==="Fighter"?30:10);let baseAtk=cA+(player.baseAtk-10);let baseMatk=player.baseMatk;let baseLuck=player.luck;let baseDef=player.baseDef;let baseSpd=player.baseSpd;let bonusSpd=bS;let dL=baseLuck+bL+(player.luckBuff>0?50:0);if(player.curseTicks>0)dL-=40;document.getElementById('display-class').innerText=player.class||"-";document.getElementById('v-rb').innerText=Math.floor(wallet.rb);document.getElementById('v-gold').innerText=Math.floor(wallet.gold).toLocaleString();document.getElementById('v-godc').innerText=Math.floor(wallet.god);document.getElementById('v-soul').innerText=wallet.soulStone||0;document.getElementById('v-chest').innerText=wallet.chest;document.getElementById('v-key').innerText=wallet.key;document.getElementById('v-p-luck').innerText=wallet.pLuck;document.getElementById('v-p-xp').innerText=wallet.pXp;document.getElementById('v-st1').innerText=`I: ${wallet.stones[1]}`;document.getElementById('v-st2').innerText=`II: ${wallet.stones[2]}`;document.getElementById('v-st3').innerText=`III: ${wallet.stones[3]}`;document.getElementById('v-st4').innerText=`IV: ${wallet.stones[4]}`;document.getElementById('v-st5').innerText=`V: ${wallet.stones[5]}`;document.getElementById('t-p-luck').innerText=player.luckBuff>0?player.luckBuff+"s":"";document.getElementById('t-p-xp').innerText=player.xpBuff>0?player.xpBuff+"s":"";document.getElementById('mail-count').innerText=mailbox.length;document.getElementById('btn-inv-count').innerText=inventory.length;document.getElementById('btn-inv-max').innerText=player.maxInv;document.getElementById('p-inv-count').innerText=inventory.length;document.getElementById('p-inv-max').innerText=player.maxInv;document.getElementById('v-lv').innerText=player.lv;document.getElementById('st-atk').innerText=baseAtk+(bA>0?` +${bA}`:"");document.getElementById('st-matk').innerText=baseMatk+(bMa>0?` +${bMa}`:"");let tH=getMaxHp();let bonusHp=tH-player.baseHp;document.getElementById('st-hp').innerText=player.baseHp+(bonusHp>0?` +${bonusHp}`:"");if(player.curHp>tH)player.curHp=tH;document.getElementById('st-def').innerText=baseDef+(bD>0?` +${bD}`:"");let fS=Math.min(50,baseSpd+bonusSpd);if(player.curseTicks>0)fS=Math.max(0,fS-40);document.getElementById('st-spd').innerText=baseSpd+(bonusSpd>0?` +${bonusSpd}`:"");let bonusL=dL-baseLuck;document.getElementById('st-luck').innerText=baseLuck+(bonusL>0?` +${bonusL}`:"");document.getElementById('cur-p-hp').innerText=Math.max(0,Math.floor(player.curHp));document.getElementById('v-points').innerText=player.points;const pA=document.getElementById('points-alert'),aB=document.querySelectorAll('.add-btn');if(player.points>0){pA.style.display='block';aB.forEach(b=>b.style.display='flex');}else{pA.style.display='none';aB.forEach(b=>b.style.display='none');}for(let s in equipment){const el=document.getElementById('eq-'+s);if(el){if(equipment[s]){el.innerText=equipment[s].name+(equipment[s].maxDurability?` (${equipment[s].durability})`:'');el.parentElement.classList.add('active');if(equipment[s].durability<=0)el.style.color='red';else el.style.color='';}else{el.innerText="-";el.parentElement.classList.remove('active');}}}let st="";if(player.burnTicks>0)st+=" 🔥["+player.burnTicks+"s]";if(player.freezeTicks>0)st+=" ❄️["+player.freezeTicks+"s]";if(player.stunTicks>0)st+=" 😵["+player.stunTicks+"s]";if(player.curseTicks>0)st+=" ☠️["+player.curseTicks+"s]";document.getElementById('status-tag').innerText=st;document.getElementById('pity-count').innerText=(pity>100)?"100/100":pity;document.getElementById('wpity-count').innerText=(wpity>100)?"100/100":wpity;document.getElementById('p-hp-fill').style.width=(player.curHp/tH*100)+"%";if(player.class==="Mage"||(eU&&eU.name==="Kyou")){document.getElementById('mana-container').style.display='block';document.getElementById('cur-p-mana').innerText=player.curMana;document.getElementById('p-mana-fill').style.width=(player.curMana/player.maxMana*100)+"%";}renderActiveMobs();let xT=`${player.xp} / ${player.nextXp}`;if(player.xpBuff>0)xT+=` (X2: ${player.xpBuff}s)`;document.getElementById('xp-text-ui').innerText=xT;document.getElementById('xp-bar').style.width=(player.xp/player.nextXp*100)+"%";const iG=document.getElementById('inv-grid');iG.innerHTML='';let fI=inventory.map((i,n)=>({i,n})).filter(o=>{if(currentInvFilter==='all')return!0;if(currentInvFilter==='unit'&&!o.i.itemType)return!0;if(currentInvFilter==='weapon'&&(o.i.itemType==='mainWep'||o.i.itemType==='subWep'))return!0;if(currentInvFilter==='armor'&&['hat','armor','pants','shoes','gloves','accessory'].includes(o.i.itemType))return!0;if(currentInvFilter==='consumable'&&o.i.itemType==='consumableSlot')return!0;return!1;});fI.forEach(({i,n})=>{const eq=isItemEquipped(i),d=document.createElement('div');d.className=`inv-item ${i.rarityClass} ${eq?'equipped':''}`;let hT,iH=!1;d.onpointerdown=()=>{iH=!1;hT=setTimeout(()=>{iH=!0;showItemInfo(i);},500);};d.onpointerup=()=>{clearTimeout(hT);if(!iH)toggleEquip(n);};d.onpointerleave=()=>clearTimeout(hT);let brokenTxt=i.maxDurability&&i.durability<=0?`<br><span style="color:red;font-size:9px">BROKEN</span>`:'';d.innerHTML=`<div style="font-size:24px;margin-bottom:5px;pointer-events:none;">${i.icon||"🌟"}</div><div class="inv-item-name" style="pointer-events:none;">${i.name}${brokenTxt}</div><div class="equipped-tag" style="pointer-events:none;">[EQUIPPED]</div><button class="sell-btn" onpointerdown="event.stopPropagation();sellUnit(${n})">Sell (${getPriceText(i.price||{rb:i.sellValueRBC||0})})</button>`;iG.appendChild(d);});renderActionButtons();document.getElementById('display-name').innerHTML=(player.isVip?'<span style="color:var(--gold);">[VIP]</span> ':'')+playerName;}
+function renderActionButtons(){const c=document.getElementById('action-buttons-container');c.innerHTML='';const iC=(player.stunTicks>0||player.freezeTicks>0);let nI=player.class==="Mage"?"⚡":"⚔️";c.innerHTML+=`<button class="sq-btn normal" ${iC?'disabled':''} onclick="hitSlime()"><i>${nI}</i><span>ATTACK</span></button>`;if(player.class==="Swordsman")c.innerHTML+=`<button class="sq-btn skill" ${iC||skillCooldown>0?'disabled':''} onclick="useSkill('swordsman')"><i>🌪️</i><span>${skillCooldown>0?skillCooldown+'s':'Slash'}</span></button>`;else if(player.class==="Fighter")c.innerHTML+=`<button class="sq-btn heavy" ${iC||skillCooldown>0?'disabled':''} onclick="useSkill('fighter')"><i>🔥</i><span>${skillCooldown>0?skillCooldown+'s':'Rage'}</span></button>`;else if(player.class==="Mage"){let cC=!iC&&skillCooldown<=0&&player.curMana>=20;c.innerHTML+=`<button class="sq-btn mage" ${!cC?'disabled':''} onclick="useSkill('mage')"><i>☄️</i><span>${skillCooldown>0?skillCooldown+'s':'Fireball'}</span></button>`;}let eU=inventory.find(i=>i.uid===player.equippedUnitUid);if(eU&&eU.name==="Kyou")c.innerHTML+=`<button class="sq-btn mage" ${iC||skillCooldown>0?'disabled':''} onclick="useSkill('kyou')"><i>🔥</i><span>${skillCooldown>0?skillCooldown+'s':'KYOU FIRE'}</span></button>`;if(equipment.mainWep&&equipment.mainWep.hasIce&&equipment.mainWep.durability>0)c.innerHTML+=`<button class="sq-btn mage" style="border-color:#00fbff;color:#00fbff;" ${iC||skillCooldown>0?'disabled':''} onclick="useSkill('ice')"><i>❄️</i><span>${skillCooldown>0?skillCooldown+'s':'ICE'}</span></button>`;if(equipment.mainWep&&equipment.mainWep.hasHeavy&&equipment.mainWep.durability>0)c.innerHTML+=`<button class="sq-btn heavy" ${iC||heavyCooldown>0?'disabled':''} onclick="heavyAttack()"><i>🪓</i><span>${heavyCooldown>0?heavyCooldown+'s':'HEAVY'}</span></button>`;if(equipment.mainWep&&equipment.mainWep.hasShoot&&equipment.mainWep.durability>0)c.innerHTML+=`<button class="sq-btn heavy" ${iC?'disabled':''} onclick="shootGun()"><i>🔫</i><span>Shoot</span></button>`;if(equipment.consumableSlot)c.innerHTML+=`<button class="sq-btn" style="border-color:#ff4500;color:#ff4500" ${iC?'disabled':''} onclick="useConsumable()"><i>${equipment.consumableSlot.icon}</i><span>USE</span></button>`;}
+function useDurability(slot){if(equipment[slot]&&equipment[slot].maxDurability){if(equipment[slot].durability>0)equipment[slot].durability--;}}
+function useConsumable(){if(!equipment.consumableSlot||player.stunTicks>0||player.freezeTicks>0)return;let c=equipment.consumableSlot;if(c.name==="Elixir")return showMsg("Auto used on DEATH!");if(c.name==="XP Potion II"){if(player.xpBuff>0 && player.xpBuffTier!==2)return showMsg("Different tier XP potion active!");player.xpBuff+=1800;player.xpBuffTier=2;equipment.consumableSlot=null;showMsg("X2 XP 30 Mins!");}else if(c.name==="LUCK Potion II"){if(player.luckBuff>0 && player.luckBuffTier!==2)return showMsg("Different tier Luck potion active!");player.luckBuff+=1800;player.luckBuffTier=2;equipment.consumableSlot=null;showMsg("X2 LUCK 30 Mins!");}updateUI();}
+function toggleEquip(x){const i=inventory[x];if(i.itemType){if(['mainWep','subWep'].includes(i.itemType)&&i.reqClass&&!i.reqClass.includes(player.class))return showMsg(`Class Restriction!\n(${i.reqClass.join(', ')})`);const s=i.itemType;if(equipment[s]&&equipment[s].uid===i.uid)equipment[s]=null;else equipment[s]=i;}else player.equippedUnitUid=(player.equippedUnitUid===i.uid)?null:i.uid;player.curHp=getMaxHp();updateUI();}function unequipItem(s){equipment[s]=null;player.curHp=getMaxHp();updateUI();}
+function openChest(t){if(wallet.chest<t||wallet.key<t)return showMsg("Not enough Chests/Keys!");let tG=0,tR=0,tGo=0,pC=0;let mult=(equipment.accessory&&equipment.accessory.name==="Lucky Money Pouch")?2:1;for(let i=0;i<t;i++){wallet.chest--;wallet.key--;let r=Math.random()*100;if(r<10)tR+=Math.floor(Math.random()*15)+5;else if(r<11)tGo+=1;else if(r<40)tG+=Math.floor(Math.random()*15001)+5000;if(Math.random()<.1){if(Math.random()<.5)wallet.pLuck++;else wallet.pXp++;pC++;}}wallet.rb+=tR;wallet.gold+=tG*mult;wallet.god+=tGo;let m=`OPENED ${t} CHEST(S)!\nGot: ${tG*mult}G, ${tR}RBC, ${tGo}God.`;if(pC>0)m+=`\nBonus ${pC} potions!`;showMsg(m);updateUI();}
+function useCode(){let c=document.getElementById('giftcode-input').value.trim().toUpperCase();if(c===""){return}if(usedCodes.includes(c))return showMsg("Code used!");if(c==="DEMO"){mailbox.push({id:Date.now(),title:"GIFTCODE DEMO",content:"Starter Gift",rewards:{rb:500,gold:2000000,chest:5,key:5}});usedCodes.push(c);showMsg("Sent to Mailbox!");}else if(c==="FIX"){mailbox.push({id:Date.now()+1,title:"GIFTCODE FIX",content:"Compensation",rewards:{rb:200,god:5,gold:1000000}});usedCodes.push(c);showMsg("Sent to Mailbox!");}else showMsg("Invalid Code!");document.getElementById('giftcode-input').value="";updateUI();}
+function openMailbox(){document.getElementById('mail-modal').style.display='flex';renderMailbox();}function closeMailbox(){document.getElementById('mail-modal').style.display='none';updateUI();}
+function claimMail(x){let m=mailbox[x];if(m.rewards.god)wallet.god+=m.rewards.god;if(m.rewards.rb)wallet.rb+=m.rewards.rb;if(m.rewards.gold)wallet.gold+=m.rewards.gold;if(m.rewards.chest)wallet.chest+=m.rewards.chest;if(m.rewards.key)wallet.key+=m.rewards.key;mailbox.splice(x,1);showMsg("Claimed!");renderMailbox();updateUI();}
+function renderMailbox(){const c=document.getElementById('mail-list');c.innerHTML='';if(mailbox.length===0){c.innerHTML=`<div style="text-align:center;color:#888;">Empty</div>`;return;}mailbox.forEach((m,x)=>{let rT="";if(m.rewards.god)rT+=`${m.rewards.god} GOD, `;if(m.rewards.rb)rT+=`${m.rewards.rb} RBC, `;if(m.rewards.gold)rT+=`${m.rewards.gold} G, `;if(m.rewards.chest)rT+=`${m.rewards.chest} Chests, `;if(m.rewards.key)rT+=`${m.rewards.key} Keys`;c.innerHTML+=`<div class="mail-item"><div style="color:var(--gold);font-weight:bold;font-size:14px;">${m.title}</div><div style="font-size:11px;margin:5px 0;">${m.content}</div><div style="font-size:11px;color:var(--cyan);margin-bottom:8px;">🎁 ${rT}</div><button class="play-btn" style="padding:5px 15px;font-size:12px;width:100%;" onclick="claimMail(${x})">CLAIM</button></div>`;});}
+function spawnNewMob(){document.getElementById('flee-boss-btn').style.display='none';activeMobs=[];targetIndex=0;let w=globalMobCount+1;document.getElementById('wave-display').innerText=`WAVE ${w}`;if(w%10===0){let q=Math.random()>.5;activeMobs.push({type:q?'queen':5,maxHp:q?2500:5e4*w,hp:q?2500:5e4*w,dmg:100*w,burnTicks:0,stunTicks:0,icon:"👑",isBoss:!0,name:q?"SLIME QUEEN":"SLIME KING"});}else if(w%5===0){activeMobs.push({type:6,maxHp:slimeTypes[6].hp+(player.lv*50),hp:slimeTypes[6].hp+(player.lv*50),dmg:slimeTypes[6].dmg,burnTicks:0,stunTicks:0});for(let i=0;i<2;i++){let d=slimeTypes[Math.floor(Math.random()*5)];activeMobs.push({type:Math.floor(Math.random()*5),maxHp:d.hp,hp:d.hp,dmg:d.dmg,burnTicks:0,stunTicks:0});}}else{let c=Math.floor(Math.random()*3)+1;for(let i=0;i<c;i++){let t=Math.floor(Math.random()*5),d=slimeTypes[t];activeMobs.push({type:t,maxHp:d.hp+(player.lv*50),hp:d.hp+(player.lv*50),dmg:d.dmg,burnTicks:0,stunTicks:0});}}renderActiveMobs();}
+function renderActiveMobs(){const c=document.getElementById('slimes-display');let h='<div id="vfx-slash" class="sword-effect"></div><div id="vfx-punch" class="punch-effect" style="display:none;">🥊</div>';if(activeMobs[targetIndex]&&activeMobs[targetIndex].hp<=0){targetIndex=activeMobs.findIndex(m=>m.hp>0);if(targetIndex===-1)targetIndex=0;}activeMobs.forEach((m,x)=>{let d=m.type==='queen'?{name:"SLIME QUEEN",icon:"👑"}:(m.type==='giant'?{name:m.name,icon:m.icon}:slimeTypes[m.type]),p=Math.max(0,(m.hp/m.maxHp*100)),iT=(x===targetIndex)?'targeted':'',iB=m.isBoss?'boss-slime-style':'',eI='';if(m.burnTicks>0)eI+='🔥 ';if(m.stunTicks>0)eI+='⚡ ';if(m.resLevel>0)eI+='🛡️';h+=`<div class="slime-wrapper ${iT}" style="${m.hp<=0?'opacity:0.3;':''}" onclick="setTarget(${x})"><div class="target-arrow">🎯</div><div class="mob-hp-bar"><div class="mob-hp-text">${Math.floor(Math.max(0,m.hp))}</div><div class="hp-fill" style="width:${p}%"></div></div><div class="mob-name-tag">${eI}${d.name}</div><div class="slime ${iB}">${d.icon}</div></div>`;});c.innerHTML=h;}
+function hitSlime(){if(player.stunTicks>0||player.freezeTicks>0)return;let iM=player.class==="Mage",eU=inventory.find(i=>i.uid===player.equippedUnitUid),bA=eU?eU.atk||0:0,bMa=eU?eU.matk||0:0;Object.values(equipment).forEach(i=>{if(i){if(i.maxDurability&&i.durability<=0)return;if(i.atk)bA+=i.atk;if(i.matk)bMa+=i.matk;}});let dL=player.luck+(player.luckBuff>0?50:0);if(player.curseTicks>0)dL-=40;Object.values(equipment).forEach(i=>{if(i&&i.luck&&(!i.maxDurability||i.durability>0))dL+=i.luck;});let wep=equipment.mainWep, cC=(player.critChance||10)+(wep&&wep.critChance?wep.critChance:0), pC=player.perfectCrit||2, iC=(Math.random()*100<cC), iP=(Math.random()*100<pC), cM=wep&&wep.critDmg?wep.critDmg:2;useDurability('mainWep');if(iM){let d=20+(player.baseMatk-10)+bMa;if(iP)d*=5;else if(iC)d*=cM;activeMobs.forEach(m=>{if(m.hp>0){let f=d;if(m.resLevel>0)f=Math.floor(f/2);m.hp-=f;if(Math.random()<.2)m.stunTicks=2;}});document.getElementById('battle-log').innerHTML=`<span class="dmg-mag">${iP?"PERFECT CRIT! ":(iC?"CRIT! ":"")}Hit: -${d} MATK</span>`;}else{let t=activeMobs[targetIndex];if(!t||t.hp<=0){t=activeMobs.find(m=>m.hp>0);if(t)targetIndex=activeMobs.indexOf(t);}if(!t)return spawnNewMob();let b=(player.class==="Swordsman")?50:(player.class==="Fighter"?30:10);if(wep&&wep.name==="Iron Axe")b=20;let d=b+(player.baseAtk-10)+bA;if(iP)d*=5;else if(iC)d*=cM;let f=d;if(t.resLevel>0)f=Math.floor(f/2);t.hp-=f;document.getElementById('battle-log').innerHTML=`<span class="dmg-phys">${iP?"PERFECT CRIT! ":(iC?"CRIT! ":"")}Hit: -${d} ATK</span>`;}checkMobsDeath(dL);updateUI();}
+function heavyAttack(){if(player.stunTicks>0||player.freezeTicks>0||heavyCooldown>0)return;let t=activeMobs[targetIndex];if(!t||t.hp<=0)t=activeMobs.find(m=>m.hp>0);if(t){t.hp-=50;document.getElementById('battle-log').innerHTML=`<span class="dmg-phys">HEAVY: -50 ATK</span>`;useDurability('mainWep');heavyCooldown=3;checkMobsDeath(player.luck);updateUI();}}
+function shootGun(){if(player.stunTicks>0||player.freezeTicks>0)return;let t=activeMobs[targetIndex];if(!t||t.hp<=0)t=activeMobs.find(m=>m.hp>0);if(t){t.hp-=100;document.getElementById('battle-log').innerHTML=`<span class="dmg-phys">SHOOT: -100 ATK</span>`;useDurability('mainWep');checkMobsDeath(player.luck);updateUI();}}
+function checkMobsDeath(dL){let aD=!0,iW=!1,iK=!1;activeMobs.forEach(m=>{if(m.hp>0)aD=!1;if(m.isWorldBoss)iW=!0;if(m.isBoss&&!m.isWorldBoss)iK=!0;});if(aD){if(iW){let k=Math.floor(Math.random()*10)+1,t=Math.floor(Math.random()*5)+1,soul=Math.floor(Math.random()*2)+1;wallet.key+=k;wallet.soulStone=(wallet.soulStone||0)+soul;showMsg(`Boss Defeated! Got ${k} Keys, ${soul} Soul Stones!`);goTo('lobby');return;}if(iK){let c=Math.floor(Math.random()*5)+1;wallet.chest+=c;wallet.key+=c;if(Math.random()<=.1){wallet.pLuck++;let md=durMap['heroic'];inventory.push({uid:Math.random().toString(36).substr(2,9),name:"Dropped Wep",icon:"🗡️",rarityClass:"heroic",itemType:"mainWep",atk:20,durability:md,maxDurability:md});showMsg(`Dropped Chest x${c}, Key x${c}, 1 Heroic Wep & Potion!`);}else showMsg(`Dropped Chest x${c}, Key x${c}!`);}globalMobCount++;gainXP(40*activeMobs.length);let hP=equipment.accessory&&equipment.accessory.name==="Lucky Money Pouch";wallet.gold+=(200*activeMobs.length)*(hP?2:1);activeMobs.forEach(()=>{if(Math.random()<(.25+(dL*.01)))wallet.chest++;if(Math.random()<(.25+(dL*.01)))wallet.key++;if(Math.random()<0.1){let t=Math.floor(Math.random()*5)+1; wallet.stones[t]++;}});setTimeout(spawnNewMob,500);}}
+function getRarityDrop(){let r=Math.random()*100,c=0,tL=player.luckBuff>0?50:0,aR=rates.map(x=>({...x}));if(tL>0){aR[0].chance+=.5;aR[1].chance+=.5;}for(let x of aR){c+=x.chance;if(r<=c)return x;}return rates[rates.length-1];}
+function pull(t,c,y){if(inventory.length+t>player.maxInv)return showMsg(`Inventory Full!`);let co=0;if(c==='rb')co=(t===1?(y==='accessory'?100:100):(y==='accessory'?1000:1000));if(c==='gold')co=(t===1?2e4:2e5);if(c==='god')co=(t===1?1:10);if(c==='rb'&&wallet.rb<co)return showMsg("Not enough RBC!");if(c==='gold'&&wallet.gold<co)return showMsg("Not enough GOLD!");if(c==='god'&&wallet.god<co)return showMsg("Not enough GOD COIN!");if(c==='rb')wallet.rb-=co;else if(c==='gold')wallet.gold-=co;else if(c==='god')wallet.god-=co;const gG=document.getElementById('gacha-result-grid');gG.innerHTML='';let pS=[],pN=[];for(let i=0;i<t;i++){let rU,id=Math.random().toString(36).substr(2,9);if(y==='special'){let th=(player.luckBuff>0)?50:20;let rR=(Math.random()*100<=th)?rates[0]:rates[1];rU={uid:id,name:rR.units[Math.floor(Math.random()*rR.units.length)],icon:rR.icon,rarityClass:rR.class,atk:rR.atk,hp:rR.hp,price:rR.price};}else if(y==='unit'){pity++;if(pity>100){let p=highPityPool[Math.floor(Math.random()*highPityPool.length)];rU={uid:id,name:p.name,icon:p.icon,rarityClass:p.class,atk:p.atk,hp:p.hp,price:p.price};pity=0;}else{let rR=getRarityDrop();rU={uid:id,name:rR.units[Math.floor(Math.random()*rR.units.length)],icon:rR.icon,rarityClass:rR.class,atk:rR.atk,hp:rR.hp,price:rR.price};}}else if(y==='accessory'){let rR=getRarityDrop();let aN=(rR.class==='epic')?"Lucky Money Pouch":"Four-leaf Clover";let db=itemDB[aN];if(!db)db=itemDB["Four-leaf Clover"];rU={uid:id,name:aN,icon:db.icon,rarityClass:rR.class,...db,itemType:db.type,price:rR.price};}else{wpity++;let rR=(wpity>100)?rates[0]:getRarityDrop();if(wpity>100)wpity=0;let wN=rR.weapons[Math.floor(Math.random()*rR.weapons.length)],db=itemDB[wN]||{type:"mainWep",atk:5},wI=db.icon||"⚔️";let maxD=durMap[rR.class]||50;rU={uid:id,name:wN,icon:wI,rarityClass:rR.class,...db,durability:maxD,maxDurability:maxD,itemType:db.type,price:rR.price};}inventory.push(rU);let aF=!['god-relic','ultra-relic','ultra-rainbow','rainbow'].includes(rU.rarityClass);let cH=`<div class="gacha-card-flip ${aF?'auto-flip':''}" onclick="this.classList.add('revealed')"><div class="gacha-inner"><div class="gacha-back">❓</div><div class="gacha-front ${rU.rarityClass}"><i>${rU.icon}</i><span>${rU.name}</span></div></div></div>`;if(rU.rarityClass==='ultra-relic'||rU.rarityClass==='god-relic')pS.push(cH);else pN.push(cH);}if(pS.length>0){document.getElementById('cutscene-container').innerHTML=pS.join('');gG.innerHTML=pN.join('')+pS.join('');document.getElementById('cutscene-modal').style.display='flex';}else{gG.innerHTML=pN.join('');document.getElementById('gacha-modal').style.display='flex';}setTimeout(()=>document.querySelectorAll('.auto-flip').forEach(c=>c.classList.add('revealed')),500);updateUI();}
+function skipCutscene(){document.getElementById('cutscene-modal').style.display='none';document.getElementById('gacha-modal').style.display='flex';}function closeGacha(){document.getElementById('gacha-modal').style.display='none';}
+function useSkill(c){if(player.stunTicks>0||player.freezeTicks>0||skillCooldown>0)return;let eU=inventory.find(i=>i.uid===player.equippedUnitUid),bA=eU?eU.atk||0:0;Object.values(equipment).forEach(i=>{if(i&&i.atk&&(!i.maxDurability||i.durability>0))bA+=i.atk;});useDurability('mainWep');if(c==='swordsman'){const v=document.getElementById('vfx-slash');v.classList.remove('slash-anim');void v.offsetWidth;v.classList.add('slash-anim');let d=(50+(player.baseAtk-10)+bA)*5;activeMobs.filter(m=>m.hp>0).slice(0,3).forEach(m=>m.hp-=d);document.getElementById('battle-log').innerHTML=`<span class="dmg-phys">SLASH: -${d} ATK!</span>`;skillCooldown=10;}else if(c==='fighter'){const v=document.getElementById('vfx-punch');v.style.display='block';v.classList.remove('punch-anim');void v.offsetWidth;v.classList.add('punch-anim');setTimeout(()=>v.style.display='none',300);let t=activeMobs[targetIndex];if(!t||t.hp<=0)t=activeMobs.find(m=>m.hp>0);if(t){let d=(30+(player.baseAtk-10)+bA)*4;t.hp-=d;let cx=document.createElement('div');cx.className='crack-fx';cx.style.left='50%';cx.style.top='50%';document.getElementById('slimes-display').appendChild(cx);setTimeout(()=>cx.remove(),300);document.getElementById('battle-log').innerHTML=`<span class="dmg-phys">RAGE: -${d} ATK!</span>`;}skillCooldown=10;}else if(c==='mage'){if(player.curMana<20)return;player.curMana-=20;activeMobs.forEach(m=>{if(m.hp>0){m.hp-=200;m.burnTicks=5;m.burnDmg=40;}});document.getElementById('battle-log').innerHTML=`<span class="dmg-mag">FIREBALL: -200 MATK!</span>`;skillCooldown=10;}else if(c==='kyou'){if(player.curMana<300)return;player.curMana-=300;activeMobs.slice(0,3).forEach(m=>{if(m.hp>0){m.hp-=1000;m.burnTicks=30;m.burnDmg=100;}});document.getElementById('battle-log').innerHTML=`<span class="dmg-mag">KYOU FIRE: -1000 MATK! BURN 30s!</span>`;skillCooldown=10;}else if(c==='ice'){activeMobs.slice(0,3).forEach(m=>{if(m.hp>0)m.stunTicks=5;});document.getElementById('battle-log').innerHTML=`<span class="dmg-mag">FREEZE 5s!</span>`;skillCooldown=10;}checkMobsDeath(player.luck);updateUI();}
+function updateBookContent(){let h=`<div class="book-section"><div class="book-title">MONSTERS</div>`;slimeTypes.forEach(m=>{h+=`<div class="book-item"><b>${m.icon} ${m.name}</b><br>HP: ${m.hp} | DMG: ${m.dmg}</div>`;});h+=`<div class="book-title" style="margin-top:20px;">GEAR</div>`;for(let k in itemDB){let i=itemDB[k],s=`ATK: ${i.atk||0} | MATK: ${i.matk||0} | DEF: ${i.def||0} | LUCK: ${i.luck||0}`,cR=i.reqClass?`REQ: ${i.reqClass.join(', ')}`:"All Classes";h+=`<div class="book-item"><b>${i.icon||"⚔️"} ${k}</b> [${cR}]<br>${s}<br><i>${i.info}</i></div>`;}h+=`<div class="book-title" style="margin-top:20px;">UNITS</div>`;rates.forEach(r=>{r.units.forEach(u=>{h+=`<div class="book-item"><b class="${r.class}">${r.icon} ${u}</b><br>ATK: ${r.atk} | HP: ${r.hp} | Rank: ${r.name}</div>`;});});h+=`</div>`;document.getElementById('book-content').innerHTML=h;}
+function goTo(p){document.getElementById('ui-game').style.display='flex';document.getElementById('p-menu').classList.remove('active-flex');document.getElementById('p-class-select').classList.remove('active-flex');document.querySelectorAll('.content-area .page').forEach(g=>g.classList.remove('active-flex'));document.getElementById('p-'+p).classList.add('active-flex');document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('nav-active'));if(document.getElementById('nav-'+p))document.getElementById('nav-'+p).classList.add('nav-active');if(p==='lobby'){if(loginData.lastClaim!==new Date(Date.now()+25200000).toISOString().split('T')[0])checkDailyLogin();setTimeout(openVip,500);}if(p==='adventure')startBattle();else stopBattle();if(p==='book')updateBookContent();updateUI();}
+function backToMenu(){stopBattle();document.getElementById('ui-game').style.display='none';document.getElementById('p-menu').classList.add('active-flex');updateSlotNames();}function openClassSelect(){document.getElementById('p-menu').classList.remove('active-flex');document.getElementById('p-class-select').classList.add('active-flex');}
+function selectClass(c){player.class=c;if(c==="Mage"){player.baseSpd=20;player.curMana=player.maxMana;}else{player.baseSpd=10;}for(let s in equipment){if(equipment[s]&&equipment[s].reqClass&&!equipment[s].reqClass.includes(c))equipment[s]=null;}document.getElementById('p-class-select').classList.remove('active-flex');goTo('lobby');updateUI();}
+function sellUnit(x){let i=inventory[x];if(!i)return;if(i.itemType){let s=i.itemType;if(equipment[s]&&equipment[s].uid===i.uid)equipment[s]=null;}else{if(player.equippedUnitUid===i.uid)player.equippedUnitUid=null;}let p=i.price;if(typeof p==='number')wallet.gold+=p;else{if(p&&p.gold)wallet.gold+=p.gold;if(p&&p.rb)wallet.rb+=p.rb;if(p&&p.god)wallet.god+=p.god;if(i.sellValueRBC)wallet.rb+=i.sellValueRBC;}inventory.splice(x,1);player.curHp=getMaxHp();updateUI();}
+function renderRarityTable(){let h=`<div style="text-align:center;color:var(--cyan);font-weight:bold;margin-bottom:10px;font-size:14px;">RARITY & RATES (%)</div>`;rates.forEach(r=>{h+=`<div class="rarity-row"><span class="${r.class}" style="padding:4px 8px;border-radius:4px;font-weight:bold;">${r.icon} ${r.name}</span><span>${r.chance}%</span></div>`;});document.getElementById('r-table').innerHTML=h;}
+function openVip(){if(player.isVip||localStorage.getItem('hideVipDate')===new Date().toDateString())return;document.getElementById('vip-modal').style.display='flex';}
+function closeVip(hide){if(hide)localStorage.setItem('hideVipDate',new Date().toDateString());document.getElementById('vip-modal').style.display='none';}
+function buyVip(){if(wallet.god<20)return showMsg("Not enough God Coins (20)!");wallet.god-=20;player.isVip=!0;for(let i=1;i<=5;i++)wallet.stones[i]+=40;inventory.push({uid:Math.random().toString(36).substr(2,9),name:"VIP Sword",icon:"👑",rarityClass:"god-relic",itemType:"mainWep",atk:10000,def:1000,luck:150,spd:30,critChance:80,critDmg:4,durability:5000,maxDurability:5000,info:"Exclusive VIP Weapon"});showMsg("VIP PURCHASED! Thank you!");closeVip(!1);updateUI();}
+window.onload=()=>{document.getElementById('display-name').innerHTML=playerName;updateUI();updateSlotNames();renderRarityTable();};
+</script></body></html>
